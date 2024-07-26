@@ -482,6 +482,125 @@ MonoBehaviour:
   m_DeselectOnBackgroundClick: 1
   m_PointerBehavior: 0
   m_CursorLockBehavior: 0
+--- !u!21 &233609305
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: fish_preview
+  m_Shader: {fileID: 4800000, guid: 656d2172c63e44dfc9144c4efb6f3d12, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _AOMap:
+        m_Texture: {fileID: 2800000, guid: 2cbe248634fc642f2810d5e5321777de, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailAlbedoMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailMask:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailNormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _HeightMap:
+        m_Texture: {fileID: 2800000, guid: 095d6c3def7424efba72666af7921137, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 8400000, guid: 1c8b59c212527844c9e9db9a56d924e2, type: 2}
+        m_Scale: {x: 3, y: 3}
+        m_Offset: {x: 0, y: 0}
+    - _MetallicGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 2800000, guid: a7b0acf2afdb9496fad176b114a5bce8, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _OcclusionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ParallaxMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RoughnessMap:
+        m_Texture: {fileID: 2800000, guid: f44f54012811a4de1a17b380dd975980, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _AORotation: 270
+    - _AOStrength: 1
+    - _AtlasSize: 1
+    - _BodyBendAmount: 0.05
+    - _BumpScale: 1
+    - _ColorStrength: 0
+    - _Cutoff: 0.5
+    - _DetailNormalMapScale: 1
+    - _DstBlend: 0
+    - _GlossMapScale: 1
+    - _Glossiness: 0.025
+    - _GlossyReflections: 1
+    - _Metallic: 0
+    - _Mode: 0
+    - _NormalRotation: 270
+    - _NormalStrength: 1
+    - _OcclusionStrength: 1
+    - _Parallax: 0.02
+    - _PatternStrength: 1
+    - _RoughnessRotation: 270
+    - _RoughnessStrength: 1
+    - _SmoothnessTextureChannel: 0
+    - _SpecularHighlights: 1
+    - _SrcBlend: 1
+    - _TailAmplitude: 0.5
+    - _TailFrequency: 2
+    - _TailFrequencyMultiplier: 0
+    - _TailPhaseOffset: 0
+    - _TailSwingAmplitude: 0.5
+    - _TailSwingPhase: 0
+    - _TileAmount: 1
+    - _UVSec: 0
+    - _ZWrite: 1
+    m_Colors:
+    - _BackColor: {r: 0, g: 0, b: 0, a: 0}
+    - _BellyColor: {r: 0, g: 0, b: 0, a: 0}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _PatternBlackColor: {r: 0, g: 0, b: 0, a: 1}
+    - _PatternWhiteColor: {r: 1, g: 1, b: 1, a: 1}
+    - _UvOffset: {r: 0, g: 0, b: 0, a: 0}
+  m_BuildTextureStacks: []
 --- !u!1 &645605297
 GameObject:
   m_ObjectHideFlags: 0
@@ -796,8 +915,12 @@ MonoBehaviour:
   minBounds: {x: -10, y: -10, z: -10}
   maxBounds: {x: 10, y: 10, z: 10}
   imageManager: {fileID: 1059982444}
-  backColors: []
-  bellyColors: []
+  backColors:
+  - {r: 0.4245283, g: 0.4245283, b: 0.4245283, a: 0}
+  - {r: 0.30113026, g: 0.9528302, b: 0.88508534, a: 0}
+  bellyColors:
+  - {r: 1, g: 0, b: 0, a: 0}
+  - {r: 0.2830189, g: 0, b: 0, a: 0}
   colorStrength: 0.5
   patternStrength: 1
   controlledBoid:
@@ -810,7 +933,7 @@ MonoBehaviour:
     tailPhaseOffset: 0
     flockTypeIndex: 0
   controlledBoidObject: {fileID: 0}
-  defaultTexture: {fileID: 0}
+  defaultTexture: {fileID: 2800000, guid: a4c73f42ef5c949d4b670189a60a53a9, type: 3}
   flowFieldStrength: 0.5
   flowFieldScale: 0.1
   targetSeekStrength: 0.2
@@ -825,8 +948,8 @@ MonoBehaviour:
     cohesionRadius: 5
     baseColor: {r: 1, g: 0.9481132, b: 0.9481132, a: 0}
     patternColor: {r: 0, g: 0.87401557, b: 1, a: 0}
-  minSpeed: 2
-  maxSpeed: 5
+  minSpeed: 0.2
+  maxSpeed: 3
 --- !u!1 &769806930
 GameObject:
   m_ObjectHideFlags: 0
@@ -981,125 +1104,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!21 &973770983
-Material:
-  serializedVersion: 8
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: fish_preview
-  m_Shader: {fileID: 4800000, guid: 656d2172c63e44dfc9144c4efb6f3d12, type: 3}
-  m_Parent: {fileID: 0}
-  m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
-  m_InvalidKeywords: []
-  m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
-  disabledShaderPasses: []
-  m_LockedProperties: 
-  m_SavedProperties:
-    serializedVersion: 3
-    m_TexEnvs:
-    - _AOMap:
-        m_Texture: {fileID: 2800000, guid: 2cbe248634fc642f2810d5e5321777de, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _BumpMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _DetailAlbedoMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _DetailMask:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _DetailNormalMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _EmissionMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _HeightMap:
-        m_Texture: {fileID: 2800000, guid: 095d6c3def7424efba72666af7921137, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _MainTex:
-        m_Texture: {fileID: 8400000, guid: 1c8b59c212527844c9e9db9a56d924e2, type: 2}
-        m_Scale: {x: 3, y: 3}
-        m_Offset: {x: 0, y: 0}
-    - _MetallicGlossMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _NormalMap:
-        m_Texture: {fileID: 2800000, guid: a7b0acf2afdb9496fad176b114a5bce8, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _OcclusionMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _ParallaxMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _RoughnessMap:
-        m_Texture: {fileID: 2800000, guid: f44f54012811a4de1a17b380dd975980, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    m_Ints: []
-    m_Floats:
-    - _AORotation: 270
-    - _AOStrength: 1
-    - _AtlasSize: 1
-    - _BodyBendAmount: 0.05
-    - _BumpScale: 1
-    - _ColorStrength: 0
-    - _Cutoff: 0.5
-    - _DetailNormalMapScale: 1
-    - _DstBlend: 0
-    - _GlossMapScale: 1
-    - _Glossiness: 0.025
-    - _GlossyReflections: 1
-    - _Metallic: 0
-    - _Mode: 0
-    - _NormalRotation: 270
-    - _NormalStrength: 1
-    - _OcclusionStrength: 1
-    - _Parallax: 0.02
-    - _PatternStrength: 1
-    - _RoughnessRotation: 270
-    - _RoughnessStrength: 1
-    - _SmoothnessTextureChannel: 0
-    - _SpecularHighlights: 1
-    - _SrcBlend: 1
-    - _TailAmplitude: 0.5
-    - _TailFrequency: 2
-    - _TailFrequencyMultiplier: 0
-    - _TailPhaseOffset: 0
-    - _TailSwingAmplitude: 0.5
-    - _TailSwingPhase: 0
-    - _TileAmount: 1
-    - _UVSec: 0
-    - _ZWrite: 1
-    m_Colors:
-    - _BackColor: {r: 0, g: 0, b: 0, a: 0}
-    - _BellyColor: {r: 0, g: 0, b: 0, a: 0}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _PatternBlackColor: {r: 0, g: 0, b: 0, a: 1}
-    - _PatternWhiteColor: {r: 1, g: 1, b: 1, a: 1}
-    - _UvOffset: {r: 0, g: 0, b: 0, a: 0}
-  m_BuildTextureStacks: []
 --- !u!1 &1059982442
 GameObject:
   m_ObjectHideFlags: 0
@@ -2189,7 +2193,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 973770983}
+  - {fileID: 233609305}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -3584,7 +3588,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: -549.9999, y: -966.66693}
-  m_SizeDelta: {x: 100, y: 100}
+  m_SizeDelta: {x: 2000, y: 2000}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &3955894605470971117
 MonoBehaviour:
@@ -4653,10 +4657,20 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 5452548824818905470}
     m_Modifications:
+    - target: {fileID: 175302025402335367, guid: ce2bc4f13bc4d4f129876c54dcd059d9,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 16.100098
+      objectReference: {fileID: 0}
     - target: {fileID: 2993305835119513606, guid: ce2bc4f13bc4d4f129876c54dcd059d9,
         type: 3}
       propertyPath: m_Name
       value: CUIColorPicker_WithLabel
+      objectReference: {fileID: 0}
+    - target: {fileID: 5326838256871609503, guid: ce2bc4f13bc4d4f129876c54dcd059d9,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -280
       objectReference: {fileID: 0}
     - target: {fileID: 5382865187613290497, guid: ce2bc4f13bc4d4f129876c54dcd059d9,
         type: 3}
@@ -4691,12 +4705,12 @@ PrefabInstance:
     - target: {fileID: 5382865187613290497, guid: ce2bc4f13bc4d4f129876c54dcd059d9,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 300
+      value: 400
       objectReference: {fileID: 0}
     - target: {fileID: 5382865187613290497, guid: ce2bc4f13bc4d4f129876c54dcd059d9,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 300
+      value: 400
       objectReference: {fileID: 0}
     - target: {fileID: 5382865187613290497, guid: ce2bc4f13bc4d4f129876c54dcd059d9,
         type: 3}
@@ -4758,6 +4772,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8694658178884807480, guid: ce2bc4f13bc4d4f129876c54dcd059d9,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -46.80005
+      objectReference: {fileID: 0}
     - target: {fileID: 8730259613917074124, guid: ce2bc4f13bc4d4f129876c54dcd059d9,
         type: 3}
       propertyPath: m_Text
@@ -4793,6 +4812,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: CUIColorPicker_WithLabel (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 5326838256871609503, guid: ce2bc4f13bc4d4f129876c54dcd059d9,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -280
+      objectReference: {fileID: 0}
     - target: {fileID: 5382865187613290497, guid: ce2bc4f13bc4d4f129876c54dcd059d9,
         type: 3}
       propertyPath: m_Pivot.x
@@ -4826,12 +4850,17 @@ PrefabInstance:
     - target: {fileID: 5382865187613290497, guid: ce2bc4f13bc4d4f129876c54dcd059d9,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 300
+      value: 400
       objectReference: {fileID: 0}
     - target: {fileID: 5382865187613290497, guid: ce2bc4f13bc4d4f129876c54dcd059d9,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 300
+      value: 400
+      objectReference: {fileID: 0}
+    - target: {fileID: 5382865187613290497, guid: ce2bc4f13bc4d4f129876c54dcd059d9,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5382865187613290497, guid: ce2bc4f13bc4d4f129876c54dcd059d9,
         type: 3}

@@ -1,0 +1,192 @@
+#pragma kernel CSMain
+
+struct Boid
+{
+    float3 position;
+    float3 velocity;
+    float2 uvOffset;
+    float3 direction;
+    float tailSwingPhase;
+    float tailFrequencyMultiplier;
+    float tailPhaseOffset;
+    int flockTypeIndex;
+};
+
+struct FlockType
+{
+    float separationWeight;
+    float alignmentWeight;
+    float cohesionWeight;
+    float separationRadius;
+    float alignmentRadius;
+    float cohesionRadius;
+    float maxSpeed;
+    float minSpeed;
+    float3 targetPosition;
+};
+
+RWStructuredBuffer<Boid> boids;
+RWStructuredBuffer<float3> positions;
+RWStructuredBuffer<float3> directions;
+StructuredBuffer<FlockType> flockTypes;
+
+int boidCount;
+int flockTypeCount;
+float deltaTime;
+float3 minBounds;
+float3 maxBounds;
+
+float flowFieldStrength;
+float flowFieldScale;
+float targetSeekStrength;
+float time;
+
+// flowField 関数の定義を追加
+float3 flowField(float3 position)
+{
+    float3 flow = float3(
+        sin(position.y * flowFieldScale + time),
+        sin(position.z * flowFieldScale + time),
+        sin(position.x * flowFieldScale + time)
+    );
+    return flow * flowFieldStrength;
+}
+
+float3 seekTarget(float3 position, float3 velocity, float3 target, float maxSpeed)
+{
+    float3 desired = normalize(target - position + sin(velocity * 100. + time + float(boidCount)*acos(-1.) )/10. ) * maxSpeed;
+    return desired - velocity;
+}
+
+float3 separation(int index, float radius)
+{
+    float3 steer = float3(0, 0, 0);
+    int count = 0;
+    for (int i = 0; i < boidCount; i++)
+    {
+        if (i != index)
+        {
+            float3 diff = boids[index].position - boids[i].position;
+            float d = length(diff);
+            if (d > 0.001 && d < radius)  // 0に近すぎる場合は無視
+            {
+                steer += normalize(diff) / d;
+                count++;
+            }
+        }
+    }
+    if (count > 0)
+    {
+        steer /= count;
+    }
+    return steer;
+}
+
+float3 alignment(int index, float radius)
+{
+    float3 avgVel = float3(0, 0, 0);
+    int count = 0;
+    for (int i = 0; i < boidCount; i++)
+    {
+        if (i != index)
+        {
+            float d = distance(boids[index].position, boids[i].position);
+            if (d < radius)
+            {
+                avgVel += boids[i].velocity;
+                count++;
+            }
+        }
+    }
+    if (count > 0)
+    {
+        avgVel /= count;
+        return avgVel - boids[index].velocity;
+    }
+    return float3(0, 0, 0);
+}
+
+float3 cohesion(int index, float radius)
+{
+    float3 center = float3(0, 0, 0);
+    int count = 0;
+    for (int i = 0; i < boidCount; i++)
+    {
+        if (i != index)
+        {
+            float d = distance(boids[index].position, boids[i].position);
+            if (d < radius)
+            {
+                center += boids[i].position;
+                count++;
+            }
+        }
+    }
+    if (count > 0)
+    {
+        center /= count;
+        return center - boids[index].position;
+    }
+    return float3(0, 0, 0);
+}
+
+[numthreads(64,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= (uint)boidCount) return;
+
+    Boid boid = boids[id.x];
+    FlockType flockType = flockTypes[boid.flockTypeIndex];
+
+    float3 sep = separation(id.x, flockType.separationRadius) * flockType.separationWeight;
+    float3 ali = alignment(id.x, flockType.alignmentRadius) * flockType.alignmentWeight;
+    float3 coh = cohesion(id.x, flockType.cohesionRadius) * flockType.cohesionWeight;
+
+    float3 flow = flowField(boid.position);
+    float3 seek = seekTarget(boid.position, boid.velocity, flockType.targetPosition, flockType.maxSpeed) * targetSeekStrength;
+
+    float3 acceleration = sep + ali + coh + flow + seek;
+    boid.velocity += acceleration * deltaTime;
+    
+    // 速度制限
+    float speed = length(boid.velocity);
+    if (speed > flockType.maxSpeed)
+    {
+        boid.velocity = (boid.velocity / speed) * flockType.maxSpeed;
+    }
+    else if (speed < flockType.minSpeed)
+    {
+        boid.velocity = (boid.velocity / speed) * flockType.minSpeed;
+    }
+
+    boid.position += boid.velocity * deltaTime;
+
+    // 境界チェック
+    float3 center = (minBounds + maxBounds) * 0.5;
+    float3 extents = (maxBounds - minBounds) * 0.5;
+    float3 offset = boid.position - center;
+    float3 normalized_offset = offset / extents;
+    
+    if (any(abs(normalized_offset) > 0.9))
+    {
+        float3 steer = -normalized_offset * 5.0; // 境界から離れる力
+        boid.velocity += steer * deltaTime;
+    }
+
+    // 方向更新
+    if (length(boid.velocity) > 0.001)
+    {
+        boid.direction = normalize(boid.velocity);
+    }
+
+    // 尻尾の動き更新
+    boid.tailSwingPhase += speed * deltaTime * boid.tailFrequencyMultiplier * 5.0;
+    if (boid.tailSwingPhase > 6.28318530718) // 2π
+    {
+        boid.tailSwingPhase -= 6.28318530718;
+    }
+
+    boids[id.x] = boid;
+    positions[id.x] = boid.position;
+    directions[id.x] = boid.direction;
+}

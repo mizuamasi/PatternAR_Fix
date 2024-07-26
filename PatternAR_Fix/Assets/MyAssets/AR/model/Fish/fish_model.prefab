@@ -77,7 +77,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 2d7d88134e02f40f189ddd94ceeb430f, type: 2}
+      objectReference: {fileID: 2100000, guid: e5ed6e02bea19492f94a648ab0ab11fb, type: 2}
     - target: {fileID: 919132149155446097, guid: 4ee7d6830d8edff4ea4d22a68ef6ca98,
         type: 3}
       propertyPath: m_Name
@@ -110,6 +110,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ae63c2eeabab47618f2db8b01de93f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseTailFrequency: 5
+  tailFrequency: 2
   tailAmplitude: 0.1
-  bodyBendAmount: 0.05

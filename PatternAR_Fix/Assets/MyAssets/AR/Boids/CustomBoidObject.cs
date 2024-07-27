@@ -83,14 +83,15 @@ public class CustomBoidObject : MonoBehaviour
         UpdatePreview();
     }
 
-    private void UpdatePreview()
+    public void UpdatePreview()
     {
         if (previewRenderer != null)
         {
             Material previewMaterial = new Material(previewRenderer.sharedMaterial);
             previewMaterial.SetColor("_BackColor", parameters.backColor);
             previewMaterial.SetColor("_BellyColor", parameters.bellyColor);
-            previewMaterial.SetColor("_PatternColor", parameters.patternColor);
+            previewMaterial.SetColor("_PatternBlackColor", parameters.patternBlackColor);
+            previewMaterial.SetColor("_PatternWhiteColor", parameters.patternWhiteColor);
             
             if (parameters.customTexture != null)
             {

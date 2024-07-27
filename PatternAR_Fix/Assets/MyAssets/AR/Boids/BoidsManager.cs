@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Collections;
 
+using UnityEngine;
+using System.Collections.Generic;
+using System.Linq;
+using System.Collections;
+
 public class BoidsManager : MonoBehaviour
 {
     public ComputeShader computeShader;
@@ -14,7 +19,6 @@ public class BoidsManager : MonoBehaviour
     public Vector3 maxBounds = new Vector3(10.0f, 10.0f, 10.0f);
     public ImageManager imageManager;
 
-    //public int fixedBoidCount = 100;
     private int actualBoidCount = 100;
 
     public Color[] backColors;
@@ -44,7 +48,7 @@ public class BoidsManager : MonoBehaviour
     public float flowFieldScale = 0.1f;
     public float targetSeekStrength = 0.2f;
     public float targetUpdateInterval = 10f;
-    public float targetRadius = 20f; // 目標位置を設定する範囲
+    public float targetRadius = 20f;
 
     private float targetUpdateTimer;
     private ComputeBuffer flockTypeBuffer;
@@ -59,8 +63,8 @@ public class BoidsManager : MonoBehaviour
         public float alignmentRadius;
         public float cohesionRadius;
         [System.NonSerialized] public Vector3 targetPosition;
-        public Color baseColor; // 基本色
-        public Color patternColor; // パターン色
+        public Color baseColor;
+        public Color patternColor;
     }
 
     public FlockType[] flockTypes;
@@ -79,10 +83,10 @@ public class BoidsManager : MonoBehaviour
     }
 
     private int kernelIndex;
+    private int updateSingleBoidKernel;
     private int maxBoids;
     public float minSpeed = 2f;
     public float maxSpeed = 5f;
-
 
     void Start()
     {
@@ -111,9 +115,10 @@ public class BoidsManager : MonoBehaviour
         }
 
         kernelIndex = computeShader.FindKernel("CSMain");
-        if (kernelIndex == -1)
+        updateSingleBoidKernel = computeShader.FindKernel("UpdateSingleBoid");
+        if (kernelIndex == -1 || updateSingleBoidKernel == -1)
         {
-            Debug.LogError("Failed to find 'CSMain' kernel in the compute shader.");
+            Debug.LogError("Failed to find required kernels in the compute shader.");
             return;
         }
 
@@ -121,8 +126,7 @@ public class BoidsManager : MonoBehaviour
         boidObjects = new List<GameObject>();
         downloadedTextures = new List<Texture2D>();
 
-
-        maxBoids = initialBoidCount; // 初期値 + 余裕
+        maxBoids = initialBoidCount;
         InitializeBoidsWithDefaultTexture();
         InitializeFlockTargets();
 
@@ -170,7 +174,7 @@ public class BoidsManager : MonoBehaviour
         {
             AddNewBoid();
         }
-        InitializeComputeBuffers(); // この行を追加
+        InitializeComputeBuffers();
         UpdateComputeBuffers();
         isInitialized = true;
     }
@@ -222,74 +226,49 @@ public class BoidsManager : MonoBehaviour
         }
         colorizer.SetIndividualParameters(newBoid.tailFrequencyMultiplier, newBoid.tailPhaseOffset);
 
-        // オブジェクトの名前をFlockTypeに応じて変更
         newBoidObject.name = $"Boid_FlockType_{flockTypeIndex}";
 
         boidObjects.Add(newBoidObject);
     }
 
-    public void AddCustomBoid(Vector3 position, Vector3 direction, CustomBoidParameters parameters)
+    // CustomBoidManager.cs
+
+    public void AddCustomBoidToFlock(CustomBoidObject customBoidObject)
     {
-        if (boidList.Count >= maxBoids)
+        Debug.Log("AddCustomBoidToFlock called with CustomBoidObject");
+        if (boidsManager == null)
         {
-            ResizeComputeBuffers();
+            Debug.LogError("BoidsManager is not assigned!");
+            return;
         }
-
-         Boid newBoid = new Boid
+        if (boidsManager != null)
         {
-            position = transform.InverseTransformPoint(position),
-            velocity = direction.normalized * Random.Range(minSpeed, maxSpeed),
-            direction = direction.normalized,
-            uvOffset = new Vector2(Random.value, Random.value),
-            tailSwingPhase = Random.value * Mathf.PI * 2.0f,
-            tailFrequencyMultiplier = Random.value,
-            tailPhaseOffset = Random.value,
-            flockTypeIndex = Random.Range(0, flockTypes.Length)
-        };
+            // カメラの位置と前方方向を取得
+            Vector3 cameraPosition = mainCamera.transform.position;
+            Vector3 cameraForward = mainCamera.transform.forward;
 
-    boidList.Add(newBoid);
+            // カメラの奥にランダムな位置を生成
+            Vector3 randomOffset = Random.insideUnitSphere * spawnRadius;
+            randomOffset.z = Mathf.Max(randomOffset.z, minSpawnDistance); // z軸の最小値を設定
+            Vector3 spawnPosition = cameraPosition + cameraForward * spawnDistance + randomOffset;
 
-        GameObject newBoidObject = Instantiate(boidPrefab, position, Quaternion.LookRotation(direction), transform);
-        newBoidObject.transform.localScale = Vector3.one * parameters.scale;
+            // カメラの方向を基準にしたランダムな回転を生成
+            Quaternion randomRotation = Quaternion.LookRotation(Random.insideUnitSphere) * mainCamera.transform.rotation;
 
-        Material boidMat = new Material(boidMaterial);
-        boidMat.SetColor("_BackColor", parameters.backColor);
-        boidMat.SetColor("_BellyColor", parameters.bellyColor);
-        boidMat.SetColor("_PatternColor", parameters.patternColor);
+            // 速度をカメラの前方方向を基準に設定
+            Vector3 initialVelocity = (randomRotation * Vector3.forward).normalized * Random.Range(boidsManager.minSpeed, boidsManager.maxSpeed);
 
-        if (parameters.customTexture != null)
-        {
-            boidMat.SetTexture("_MainTex", parameters.customTexture);
-        }
+            // CustomBoidParametersを取得
+            CustomBoidParameters parameters = customBoidObject.parameters;
 
-        newBoidObject.GetComponent<Renderer>().material = boidMat;
-
-        BoidMeshColorizer colorizer = newBoidObject.GetComponent<BoidMeshColorizer>();
-        if (colorizer != null)
-        {
-            colorizer.SetIndividualParameters(newBoid.tailFrequencyMultiplier, newBoid.tailPhaseOffset);
-        }
-
-        boidObjects.Add(newBoidObject);
-
-        UpdateComputeBuffers();
-    }
-
-     public void OnAddCustomBoidButtonClicked()
-    {
-        CustomBoidObject[] customBoidObjects = FindObjectsOfType<CustomBoidObject>();
-        if (customBoidObjects.Length > 0)
-        {
-            int randomIndex = Random.Range(0, customBoidObjects.Length);
-            customBoidObjects[randomIndex].AddToFlock();
+            // BoidsManagerのAddCustomBoidToFlockメソッドを呼び出す
+            boidsManager.AddCustomBoidToFlock(customBoidObject.GetComponent<Renderer>().material, spawnPosition, initialVelocity, Vector3.one * parameters.scale);
         }
         else
         {
-            Debug.LogWarning("No CustomBoidObject found in the scene.");
+            Debug.LogError("BoidsManager is not assigned to CustomBoidManager!");
         }
     }
-
-
 
     void OnTexturesDownloaded(List<Texture2D> textures)
     {
@@ -311,7 +290,6 @@ public class BoidsManager : MonoBehaviour
 
             if (resizedTexture.width != 128 || resizedTexture.height != 128)
             {
-                //Debug.LogError("Resized texture has unexpected size: " + resizedTexture.width + "x" + resizedTexture.height);
                 continue;
             }
 
@@ -360,60 +338,15 @@ public class BoidsManager : MonoBehaviour
         return resizedTexture;
     }
 
-    // void UpdateComputeBuffers()
-    // {
-    //     boidBuffer.SetData(boidList.ToArray());
-    //     Vector3[] positions = boidList.Select(b => b.position).ToArray();
-    //     Vector3[] directions = boidList.Select(b => b.direction).ToArray();
-    //     positionBuffer.SetData(positions);
-    //     directionBuffer.SetData(directions);
-    //     flockTypeBuffer.SetData(flockTypes);
-
-    //     computeShader.SetBuffer(kernelIndex, "boids", boidBuffer);
-    //     computeShader.SetBuffer(kernelIndex, "positions", positionBuffer);
-    //     computeShader.SetBuffer(kernelIndex, "directions", directionBuffer);
-    //     computeShader.SetBuffer(kernelIndex, "flockTypes", flockTypeBuffer);
-    // }
-
     void UpdateComputeBuffers()
     {
-        int boidSize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Boid));
-        int requiredSize = boidList.Count;
-        
-        if (boidBuffer == null || boidBuffer.count < requiredSize)
-        {
-            if (boidBuffer != null) boidBuffer.Release();
-            boidBuffer = new ComputeBuffer(Mathf.Max(1, requiredSize), boidSize);
-        }
-
-        if (positionBuffer == null || positionBuffer.count < requiredSize)
-        {
-            if (positionBuffer != null) positionBuffer.Release();
-            positionBuffer = new ComputeBuffer(Mathf.Max(1, requiredSize), sizeof(float) * 3);
-        }
-
-        if (directionBuffer == null || directionBuffer.count < requiredSize)
-        {
-            if (directionBuffer != null) directionBuffer.Release();
-            directionBuffer = new ComputeBuffer(Mathf.Max(1, requiredSize), sizeof(float) * 3);
-        }
-
-        // データの設定
         boidBuffer.SetData(boidList.ToArray());
         Vector3[] positions = boidList.Select(b => b.position).ToArray();
         Vector3[] directions = boidList.Select(b => b.direction).ToArray();
         positionBuffer.SetData(positions);
         directionBuffer.SetData(directions);
-
-        // FlockTypeBufferの更新（必要に応じて）
-        if (flockTypeBuffer == null || flockTypeBuffer.count < flockTypes.Length)
-        {
-            if (flockTypeBuffer != null) flockTypeBuffer.Release();
-            flockTypeBuffer = new ComputeBuffer(Mathf.Max(1, flockTypes.Length), sizeof(float) * 10); // FlockTypeのサイズに応じて調整
-        }
         flockTypeBuffer.SetData(flockTypes);
 
-        // Compute Shaderにバッファを設定
         computeShader.SetBuffer(kernelIndex, "boids", boidBuffer);
         computeShader.SetBuffer(kernelIndex, "positions", positionBuffer);
         computeShader.SetBuffer(kernelIndex, "directions", directionBuffer);
@@ -423,16 +356,6 @@ public class BoidsManager : MonoBehaviour
     void Update()
     {
         if (!isInitialized) return;
-
-        if (boidBuffer == null || positionBuffer == null || directionBuffer == null || flockTypeBuffer == null)
-        {
-            //Debug.LogError("Compute buffers are not initialized. Reinitializing...");
-            InitializeComputeBuffers();
-            if (boidBuffer == null || positionBuffer == null || directionBuffer == null || flockTypeBuffer == null)
-            {
-                return; // バッファの初期化に失敗した場合は早期リターン
-            }
-        }
 
         targetUpdateTimer += Time.deltaTime;
         if (targetUpdateTimer >= targetUpdateInterval)
@@ -453,18 +376,6 @@ public class BoidsManager : MonoBehaviour
         UpdateComputeBuffers();
 
         computeShader.Dispatch(kernelIndex, Mathf.CeilToInt(boidList.Count / 64f), 1, 1);
-
-        computeShader.Dispatch(kernelIndex, Mathf.CeilToInt(boidList.Count / 64f), 1, 1);
-
-        // デバッグ: バッファの内容を確認
-        Boid[] debugBoids = new Boid[boidList.Count];
-        boidBuffer.GetData(debugBoids);
-
-        // 最初の数個のBoidの情報を出力
-        for (int i = 0; i < Mathf.Min(5, debugBoids.Length); i++)
-        {
-            Debug.Log($"Boid {i}: Pos={debugBoids[i].position}, Vel={debugBoids[i].velocity}, Dir={debugBoids[i].direction}");
-        }
 
         Vector3[] positions = new Vector3[boidList.Count];
         Vector3[] directions = new Vector3[boidList.Count];
@@ -492,11 +403,6 @@ public class BoidsManager : MonoBehaviour
                 renderer.material.SetFloat("_TailPhaseOffset", updatedBoid.tailPhaseOffset);
             }
         }
-
-        // if (boidList.Count > 0)
-        // {
-        //     Debug.Log($"Boid 0 - Position: {boidList[0].position}, Velocity: {boidList[0].velocity}, TailSwingPhase: {boidList[0].tailSwingPhase}");
-        // }
     }
 
     void InitializeFlockTargets()
@@ -514,7 +420,7 @@ public class BoidsManager : MonoBehaviour
         for (int i = 0; i < flockTypes.Length; i++)
         {
             FlockType flock = flockTypes[i];
-            if (Random.value < 0.3f) // 30%の確率で新しい目標位置を設定
+            if (Random.value < 0.3f)
             {
                 flock.targetPosition = GetRandomTargetPosition();
             }
@@ -537,7 +443,6 @@ public class BoidsManager : MonoBehaviour
     {
         if (isControlledBoidInFlock)
         {
-            // Remove from flock
             int index = boidList.FindIndex(b => b.Equals(controlledBoid));
             if (index != -1)
             {
@@ -546,7 +451,6 @@ public class BoidsManager : MonoBehaviour
                 boidObjects.RemoveAt(index);
             }
             
-            // Restore controlled boid
             controlledBoidObject.transform.position = controlledBoidInitialPosition;
             controlledBoidObject.SetActive(true);
             
@@ -554,7 +458,6 @@ public class BoidsManager : MonoBehaviour
         }
         else
         {
-            // Add to flock
             controlledBoid = new Boid
             {
                 position = transform.InverseTransformPoint(position),
@@ -596,51 +499,39 @@ public class BoidsManager : MonoBehaviour
         return Random.insideUnitSphere * targetRadius;
     }
 
+    private void UpdateBoidInComputeShader(int index, Boid boid)
+    {
+        computeShader.SetInt("updateIndex", index);
+        computeShader.SetVector("updatePosition", boid.position);
+        computeShader.SetVector("updateVelocity", boid.velocity);
+        computeShader.SetVector("updateUvOffset", boid.uvOffset);
+        computeShader.SetVector("updateDirection", boid.direction);
+        computeShader.SetFloat("updateTailSwingPhase", boid.tailSwingPhase);
+        computeShader.SetFloat("updateTailFrequencyMultiplier", boid.tailFrequencyMultiplier);
+        computeShader.SetFloat("updateTailPhaseOffset", boid.tailPhaseOffset);
+        computeShader.SetInt("updateFlockTypeIndex", boid.flockTypeIndex);
+
+        computeShader.Dispatch(updateSingleBoidKernel, 1, 1, 1);
+    }
 }
 
 [System.Serializable]
-public class CustomBoidParameters
+public struct CustomBoidParameters
 {
     public Color backColor;
     public Color bellyColor;
-    public Color patternColor;
+    public Color patternBlackColor;
+    public Color patternWhiteColor;
+    public float colorStrength;
+    public float patternStrength;
+    public float glossiness;
+    public float metallic;
+    public float normalRotation;
+    public float aoRotation;
+    public float roughnessRotation;
+    public float normalStrength;
+    public float aoStrength;
+    public float roughnessStrength;
+    public Texture2D customTexture;
     public float scale;
-    public Texture2D customTexture; // 新しく追加
-    // 他の必要なパラメータをここに追加
 }
-// public class CustomBoidObject : MonoBehaviour
-// {
-//     public CustomBoidParameters parameters;
-//     public BoidsManager boidsManager;
-
-//     [Header("UI Controls")]
-//     public UnityEngine.UI.Button addToFlockButton;
-
-//     private void Start()
-//     {
-//         if (addToFlockButton != null)
-//         {
-//             addToFlockButton.onClick.AddListener(AddToFlock);
-//         }
-//     }
-
-//     public void AddToFlock()
-//     {
-//         if (boidsManager != null)
-//         {
-//             boidsManager.AddCustomBoid(transform.position, transform.forward, parameters);
-//         }
-//         else
-//         {
-//             Debug.LogError("BoidsManager is not assigned to CustomBoidObject!");
-//         }
-//     }
-
-//     private void OnValidate()
-//     {
-//         if (boidsManager == null)
-//         {
-//             boidsManager = FindObjectOfType<BoidsManager>();
-//         }
-//     }
-// }

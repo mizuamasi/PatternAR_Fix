@@ -120,7 +120,7 @@ Shader "Custom/BoidsShader"
             fixed4 baseColor = lerp(_BellyColor, _BackColor, backFactor + sideFactor * 0.5);
             float patternStrength = saturate(patternFactor * pow(patternIntensity, 1.5)); // パターンの強度を強調
             fixed3 finalColor = lerp(baseColor.rgb, patternColor, patternStrength);
-            uv *= 10.;
+            uv *= 33.;
             // Normal map の適用
             float2 normalUV = RotateUV(uv, _NormalRotation);
             fixed3 normalTex = UnpackNormal(tex2D(_NormalMap, normalUV)).rgb;

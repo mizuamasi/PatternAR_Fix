@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657844, g: 0.49641222, b: 0.57481676, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -233,112 +233,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 24328488}
   m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &62656519
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 62656523}
-  - component: {fileID: 62656522}
-  - component: {fileID: 62656521}
-  - component: {fileID: 62656520}
-  m_Layer: 0
-  m_Name: Quad
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!64 &62656520
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 62656519}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
---- !u!23 &62656521
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 62656519}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 9e83cff355cb24eca9f458a7e12dd9a9, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &62656522
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 62656519}
-  m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
---- !u!4 &62656523
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 62656519}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &74376322
 GameObject:
   m_ObjectHideFlags: 0
@@ -383,12 +277,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6783348053839bc4b80b36726839b278, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  CustomBOidObjectOriginak: {fileID: 3498748974517320120}
   parameters:
     backColor: {r: 0, g: 0, b: 0, a: 0}
     bellyColor: {r: 0, g: 0, b: 0, a: 0}
-    patternColor: {r: 0, g: 0, b: 0, a: 0}
-    scale: 0
+    patternBlackColor: {r: 0, g: 0, b: 0, a: 0}
+    patternWhiteColor: {r: 0, g: 0, b: 0, a: 0}
+    colorStrength: 0
+    patternStrength: 0
+    glossiness: 0
+    metallic: 0
+    normalRotation: 0
+    aoRotation: 0
+    roughnessRotation: 0
+    normalStrength: 0
+    aoStrength: 0
+    roughnessStrength: 0
     customTexture: {fileID: 0}
+    scale: 0
   addToFlockButton: {fileID: 7905233137654788859}
   selectTextureButton: {fileID: 7628993408783410402}
   previewRenderer: {fileID: 1892433516507706227}
@@ -482,7 +388,7 @@ MonoBehaviour:
   m_DeselectOnBackgroundClick: 1
   m_PointerBehavior: 0
   m_CursorLockBehavior: 0
---- !u!21 &643132170
+--- !u!21 &608481050
 Material:
   serializedVersion: 8
   m_ObjectHideFlags: 0
@@ -597,8 +503,8 @@ Material:
     - _BellyColor: {r: 0, g: 0, b: 0, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _PatternBlackColor: {r: 0, g: 0, b: 0, a: 1}
-    - _PatternWhiteColor: {r: 1, g: 1, b: 1, a: 1}
+    - _PatternBlackColor: {r: 0, g: 0, b: 0, a: 0}
+    - _PatternWhiteColor: {r: 0, g: 0, b: 0, a: 0}
     - _UvOffset: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
 --- !u!1 &645605297
@@ -632,6 +538,7 @@ Transform:
   m_Children:
   - {fileID: 74376323}
   - {fileID: 736624690}
+  - {fileID: 732251527}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &685614910
@@ -862,6 +769,55 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
+--- !u!1 &732251526
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 732251527}
+  - component: {fileID: 732251528}
+  m_Layer: 0
+  m_Name: CustomBoidsManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &732251527
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 732251526}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 645605298}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &732251528
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 732251526}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b9954720fa79b014298603b3fdba9df5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  boidsManager: {fileID: 736624691}
+  mainCamera: {fileID: 685614916}
+  spawnDistance: 5
+  spawnRadius: 2
+  minSpawnDistance: 0.5
 --- !u!1 &736624689
 GameObject:
   m_ObjectHideFlags: 0
@@ -906,6 +862,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 663d128c947004bfba7f626957afbe1e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainCamera: {fileID: 685614916}
+  cameraPullStrength: 1
+  maxDistanceFromCamera: 7
   computeShader: {fileID: 7200000, guid: 236de8685d5474459b980925f59aeb7f, type: 3}
   boidMaterial: {fileID: 2100000, guid: 981b2494c88af48a09f240a0df795dd9, type: 2}
   boidPrefab: {fileID: 6308538172047497422, guid: 149729732000710498535b1f94012b3c,
@@ -915,25 +874,8 @@ MonoBehaviour:
   minBounds: {x: -10, y: -10, z: -10}
   maxBounds: {x: 10, y: 10, z: 10}
   imageManager: {fileID: 1059982444}
-  backColors:
-  - {r: 0.4245283, g: 0.4245283, b: 0.4245283, a: 0}
-  - {r: 0.30113026, g: 0.9528302, b: 0.88508534, a: 0}
-  bellyColors:
-  - {r: 1, g: 0, b: 0, a: 0}
-  - {r: 0.2830189, g: 0, b: 0, a: 0}
   colorStrength: 0.5
   patternStrength: 1
-  controlledBoid:
-    position: {x: 0, y: 0, z: 0}
-    velocity: {x: 0, y: 0, z: 0}
-    uvOffset: {x: 0, y: 0}
-    direction: {x: 0, y: 0, z: 0}
-    tailSwingPhase: 0
-    tailFrequencyMultiplier: 0
-    tailPhaseOffset: 0
-    flockTypeIndex: 0
-  controlledBoidObject: {fileID: 0}
-  defaultTexture: {fileID: 2800000, guid: a4c73f42ef5c949d4b670189a60a53a9, type: 3}
   flowFieldStrength: 0.5
   flowFieldScale: 0.1
   targetSeekStrength: 0.2
@@ -946,8 +888,8 @@ MonoBehaviour:
     separationRadius: 2
     alignmentRadius: 1
     cohesionRadius: 5
-    baseColor: {r: 1, g: 0.9481132, b: 0.9481132, a: 0}
-    patternColor: {r: 0, g: 0.87401557, b: 1, a: 0}
+    maxSpeed: 0
+    minSpeed: 0
   minSpeed: 0.2
   maxSpeed: 3
 --- !u!1 &769806930
@@ -2193,7 +2135,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 643132170}
+  - {fileID: 608481050}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -5589,7 +5531,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 6988722291311512963}
   m_Direction: 0
   m_Value: 1
-  m_Size: 0.99999994
+  m_Size: 0.9999998
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -5624,5 +5566,4 @@ SceneRoots:
   - {fileID: 1350222666}
   - {fileID: 645605298}
   - {fileID: 164997433}
-  - {fileID: 62656523}
   - {fileID: 1660434157}

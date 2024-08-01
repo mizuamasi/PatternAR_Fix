@@ -1,15 +1,14 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 public class CustomBoidManager : MonoBehaviour
 {
     public static CustomBoidManager Instance { get; private set; }
 
     public BoidsManager boidsManager;
-    public Camera mainCamera;  // インスペクターでメインカメラを割り当てる
-    public float spawnDistance = 5f;  // カメラからの生成距離（奥に配置するため、大きめの値を設定）
-    public float spawnRadius = 2f;  // 生成範囲の半径
-    public float minSpawnDistance = 0.5f;  // 最小生成距離（0にならないようにする）
+    public Camera mainCamera;
+    public float spawnDistance = 5f;
+    public float spawnRadius = 2f;
+    public float minSpawnDistance = 0.5f;
 
     private void Awake()
     {
@@ -25,51 +24,49 @@ public class CustomBoidManager : MonoBehaviour
 
     public void AddCustomBoidToFlock(CustomBoidObject customBoidObject)
     {
-        Debug.Log("AddCustomBoidToFlock called with CustomBoidObject");
         if (boidsManager == null)
         {
             Debug.LogError("BoidsManager is not assigned!");
             return;
         }
-        if (boidsManager != null)
+
+         CustomBoidParameters parameters = customBoidObject.GetCurrentParameters();
+        // パラメータのscaleが正しく設定されていることを確認
+        if (parameters.scale == 0f)
         {
-             // カメラの位置と前方方向を取得
-            Vector3 cameraPosition = mainCamera.transform.position;
-            Vector3 cameraForward = mainCamera.transform.forward;
-
-            // カメラの奥にランダムな位置を生成
-            Vector3 randomOffset = Random.insideUnitSphere * spawnRadius;
-            randomOffset.z = Mathf.Max(randomOffset.z, minSpawnDistance); // z軸の最小値を設定
-            Vector3 spawnPosition = cameraPosition + cameraForward * spawnDistance + randomOffset;
-
-            // カメラの方向を基準にしたランダムな回転を生成
-            Quaternion randomRotation = Quaternion.LookRotation(Random.insideUnitSphere) * mainCamera.transform.rotation;
-
-            // 速度をカメラの前方方向を基準に設定
-            Vector3 initialVelocity = (randomRotation * Vector3.forward).normalized * Random.Range(boidsManager.minSpeed, boidsManager.maxSpeed);
-
-            // CustomBoidParametersを取得
-            CustomBoidParameters parameters = customBoidObject.parameters;
-
-            // BoidsManagerのAddCustomBoidメソッドを呼び出す
-            boidsManager.AddCustomBoid(spawnPosition, initialVelocity, parameters);
-
+            parameters.scale = 0.1f;  // デフォルト値を設定
+            Debug.LogWarning("Boid scale was 0, set to default value 1");
         }
-        else
-        {
-            Debug.LogError("BoidsManager is not assigned to CustomBoidManager!");
-        }
+
+        Vector3 spawnPosition = CalculateSpawnPosition();
+        Vector3 initialDirection = CalculateInitialDirection();
+
+        boidsManager.AddCustomBoidToFlock(parameters, spawnPosition, initialDirection);
+    }
+
+    private Vector3 CalculateSpawnPosition()
+    {
+        Vector3 cameraPosition = mainCamera.transform.position;
+        Vector3 cameraForward = mainCamera.transform.forward;
+
+        Vector3 randomOffset = Random.insideUnitSphere * spawnRadius;
+        randomOffset.z = Mathf.Max(randomOffset.z, minSpawnDistance);
+        
+        return cameraPosition + cameraForward * spawnDistance + randomOffset;
+    }
+
+    private Vector3 CalculateInitialDirection()
+    {
+        Quaternion randomRotation = Quaternion.LookRotation(Random.insideUnitSphere) * mainCamera.transform.rotation;
+        return (randomRotation * Vector3.forward).normalized;
     }
 
     public void AddRandomCustomBoidToFlock()
     {
-        Debug.Log("AddRandomCustomBoidToFlock called");
         CustomBoidObject[] customBoidObjects = FindObjectsOfType<CustomBoidObject>();
-        Debug.Log($"Found {customBoidObjects.Length} CustomBoidObjects");
         if (customBoidObjects.Length > 0)
         {
             int randomIndex = Random.Range(0, customBoidObjects.Length);
-            Debug.Log($"Selected CustomBoidObject at index {randomIndex}");
             AddCustomBoidToFlock(customBoidObjects[randomIndex]);
         }
         else

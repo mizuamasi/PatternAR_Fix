@@ -1,5 +1,4 @@
 #pragma kernel CSMain
-#pragma kernel UpdateSingleBoid
 
 struct Boid
 {
@@ -34,50 +33,28 @@ StructuredBuffer<FlockType> flockTypes;
 int boidCount;
 int flockTypeCount;
 float deltaTime;
-float3 minBounds;
-float3 maxBounds;
+float3 cameraPosition;
+float cameraPullStrength;
+float maxDistanceFromCamera;
 
 float flowFieldStrength;
 float flowFieldScale;
 float targetSeekStrength;
 float time;
 
-// 単一のBoid更新用の変数
-int updateIndex;
-float3 updatePosition;
-float3 updateVelocity;
-float2 updateUvOffset;
-float3 updateDirection;
-float updateTailSwingPhase;
-float updateTailFrequencyMultiplier;
-float updateTailPhaseOffset;
-int updateFlockTypeIndex;
-
 float3 flowField(float3 position)
 {
-    float3 flow;
-    
-    // X軸
-    flow.x = sin(position.y * flowFieldScale * 1.1 + time * 0.9) * 0.5
-           + sin(position.z * flowFieldScale * 0.8 + time * 1.1) * 0.3
-           + sin((position.x + position.y) * flowFieldScale * 1.2 + time * 1.3) * 0.2;
-
-    // Y軸
-    flow.y = sin(position.z * flowFieldScale * 0.9 + time * 1.2) * 0.4
-           + sin(position.x * flowFieldScale * 1.3 + time * 0.8) * 0.4
-           + sin((position.y + position.z) * flowFieldScale * 1.1 + time * 1.0) * 0.2;
-
-    // Z軸
-    flow.z = sin(position.x * flowFieldScale * 1.2 + time * 1.1) * 0.45
-           + sin(position.y * flowFieldScale * 0.7 + time * 0.9) * 0.35
-           + sin((position.z + position.x) * flowFieldScale * 1.0 + time * 1.2) * 0.2;
-
+    float3 flow = float3(
+        sin(position.y * flowFieldScale + time * 0.5) * cos(position.z * flowFieldScale + time * 0.7),
+        sin(position.z * flowFieldScale + time * 0.6) * cos(position.x * flowFieldScale + time * 0.8),
+        sin(position.x * flowFieldScale + time * 0.7) * cos(position.y * flowFieldScale + time * 0.6)
+    );
     return flow * flowFieldStrength;
 }
 
 float3 seekTarget(float3 position, float3 velocity, float3 target, float maxSpeed)
 {
-    float3 desired = normalize(target - position + sin(velocity * 100. + time + float(boidCount)*acos(-1.) )/10. ) * maxSpeed;
+    float3 desired = normalize(target - position) * maxSpeed;
     return desired - velocity;
 }
 
@@ -153,6 +130,14 @@ float3 cohesion(int index, float radius)
     return float3(0, 0, 0);
 }
 
+float3 cameraPull(float3 position)
+{
+    float3 toCamera = cameraPosition - position;
+    float distanceToCamera = length(toCamera);
+    float pullFactor = saturate(distanceToCamera / maxDistanceFromCamera);
+    return normalize(toCamera) * pullFactor * cameraPullStrength;
+}
+
 [numthreads(64,1,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
@@ -167,8 +152,9 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 
     float3 flow = flowField(boid.position);
     float3 seek = seekTarget(boid.position, boid.velocity, flockType.targetPosition, flockType.maxSpeed) * targetSeekStrength;
+    float3 pull = cameraPull(boid.position);
 
-    float3 acceleration = sep + ali + coh + flow + seek;
+    float3 acceleration = sep + ali + coh + flow + seek + pull;
     boid.velocity += acceleration * deltaTime;
     
     float speed = length(boid.velocity);
@@ -183,24 +169,13 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 
     boid.position += boid.velocity * deltaTime;
 
-    float3 center = (minBounds + maxBounds) * 0.5;
-    float3 extents = (maxBounds - minBounds) * 0.5;
-    float3 offset = boid.position - center;
-    float3 normalized_offset = offset / extents;
-    
-    if (any(abs(normalized_offset) > 0.9))
-    {
-        float3 steer = -normalized_offset * 5.0;
-        boid.velocity += steer * deltaTime;
-    }
-
     if (length(boid.velocity) > 0.001)
     {
         boid.direction = normalize(boid.velocity);
     }
 
     boid.tailSwingPhase += speed * deltaTime * boid.tailFrequencyMultiplier * 5.0;
-    if (boid.tailSwingPhase > 6.28318530718)
+    if (boid.tailSwingPhase > 6.28318530718) // 2π
     {
         boid.tailSwingPhase -= 6.28318530718;
     }
@@ -208,22 +183,4 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     boids[id.x] = boid;
     positions[id.x] = boid.position;
     directions[id.x] = boid.direction;
-}
-
-[numthreads(1,1,1)]
-void UpdateSingleBoid (uint3 id : SV_DispatchThreadID)
-{
-    Boid boid;
-    boid.position = updatePosition;
-    boid.velocity = updateVelocity;
-    boid.uvOffset = updateUvOffset;
-    boid.direction = updateDirection;
-    boid.tailSwingPhase = updateTailSwingPhase;
-    boid.tailFrequencyMultiplier = updateTailFrequencyMultiplier;
-    boid.tailPhaseOffset = updateTailPhaseOffset;
-    boid.flockTypeIndex = updateFlockTypeIndex;
-
-    boids[updateIndex] = boid;
-    positions[updateIndex] = boid.position;
-    directions[updateIndex] = boid.direction;
 }

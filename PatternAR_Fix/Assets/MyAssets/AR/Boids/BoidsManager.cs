@@ -1,12 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
-using System.Collections;
-
-using UnityEngine;
-using System.Collections.Generic;
-using System.Linq;
-using System.Collections;
 
 public class BoidsManager : MonoBehaviour
 {
@@ -19,10 +13,6 @@ public class BoidsManager : MonoBehaviour
     public Vector3 maxBounds = new Vector3(10.0f, 10.0f, 10.0f);
     public ImageManager imageManager;
 
-    private int actualBoidCount = 100;
-
-    public Color[] backColors;
-    public Color[] bellyColors;
     [Range(0, 1)]
     public float colorStrength = 0.5f;
     [Range(0, 1)]
@@ -35,14 +25,6 @@ public class BoidsManager : MonoBehaviour
     private List<GameObject> boidObjects;
     private Texture2D textureAtlas;
     private bool isInitialized = false;
-    private List<Texture2D> downloadedTextures;
-
-    public Boid controlledBoid;
-    public GameObject controlledBoidObject;
-    private bool isControlledBoidInFlock = false;
-    private Vector3 controlledBoidInitialPosition;
-
-    public Texture2D defaultTexture;
 
     public float flowFieldStrength = 0.5f;
     public float flowFieldScale = 0.1f;
@@ -62,9 +44,9 @@ public class BoidsManager : MonoBehaviour
         public float separationRadius;
         public float alignmentRadius;
         public float cohesionRadius;
+        public float maxSpeed;
+        public float minSpeed;
         [System.NonSerialized] public Vector3 targetPosition;
-        public Color baseColor;
-        public Color patternColor;
     }
 
     public FlockType[] flockTypes;
@@ -83,31 +65,24 @@ public class BoidsManager : MonoBehaviour
     }
 
     private int kernelIndex;
-    private int updateSingleBoidKernel;
     private int maxBoids;
     public float minSpeed = 2f;
     public float maxSpeed = 5f;
 
+    public Camera mainCamera;
+    public float cameraPullStrength = 1f;
+    public float maxDistanceFromCamera = 20f;
+
     void Start()
     {
-        if (defaultTexture == null)
-        {
-            Debug.LogError("Default texture is not set. Please assign a default texture in the inspector.");
-            return;
-        }
+        InitializeComputeShader();
+        InitializeBoidsWithDefaultTexture();
+        InitializeFlockTargets();
+        StartCoroutine(imageManager.GetImagesForBoids(initialBoidCount, OnTexturesDownloaded));
+    }
 
-        if (defaultTexture.width != 256 || defaultTexture.height != 256)
-        {
-            Debug.LogError("Default texture must be 256x256 pixels.");
-            return;
-        }
-
-        if (flockTypes == null || flockTypes.Length == 0)
-        {
-            Debug.LogError("FlockTypes are not set. Please set up flock types in the inspector.");
-            return;
-        }
-
+    void InitializeComputeShader()
+    {
         if (computeShader == null)
         {
             Debug.LogError("Compute Shader is not assigned. Please assign it in the inspector.");
@@ -115,32 +90,16 @@ public class BoidsManager : MonoBehaviour
         }
 
         kernelIndex = computeShader.FindKernel("CSMain");
-        updateSingleBoidKernel = computeShader.FindKernel("UpdateSingleBoid");
-        if (kernelIndex == -1 || updateSingleBoidKernel == -1)
+        if (kernelIndex == -1)
         {
-            Debug.LogError("Failed to find required kernels in the compute shader.");
+            Debug.LogError("Failed to find required kernel in the compute shader.");
             return;
         }
 
         boidList = new List<Boid>();
         boidObjects = new List<GameObject>();
-        downloadedTextures = new List<Texture2D>();
 
         maxBoids = initialBoidCount;
-        InitializeBoidsWithDefaultTexture();
-        InitializeFlockTargets();
-
-        StartCoroutine(imageManager.GetImagesForBoids(initialBoidCount, OnTexturesDownloaded));
-    }
-
-    void ResizeComputeBuffers()
-    {
-        maxBoids *= 2;
-
-        if (boidBuffer != null) boidBuffer.Release();
-        if (positionBuffer != null) positionBuffer.Release();
-        if (directionBuffer != null) directionBuffer.Release();
-
         InitializeComputeBuffers();
     }
 
@@ -149,32 +108,21 @@ public class BoidsManager : MonoBehaviour
         int boidStride = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Boid));
         int flockTypeStride = System.Runtime.InteropServices.Marshal.SizeOf(typeof(FlockType));
 
-        boidBuffer = new ComputeBuffer(Mathf.Max(1, boidList.Count), boidStride);
-        positionBuffer = new ComputeBuffer(Mathf.Max(1, boidList.Count), sizeof(float) * 3);
-        directionBuffer = new ComputeBuffer(Mathf.Max(1, boidList.Count), sizeof(float) * 3);
+        boidBuffer = new ComputeBuffer(Mathf.Max(1, maxBoids), boidStride);
+        positionBuffer = new ComputeBuffer(Mathf.Max(1, maxBoids), sizeof(float) * 3);
+        directionBuffer = new ComputeBuffer(Mathf.Max(1, maxBoids), sizeof(float) * 3);
         flockTypeBuffer = new ComputeBuffer(Mathf.Max(1, flockTypes.Length), flockTypeStride);
     }
 
     void InitializeBoidsWithDefaultTexture()
     {
         textureAtlas = new Texture2D(atlasSize * 256, atlasSize * 256, TextureFormat.RGBA32, false);
-        Color[] defaultPixels = defaultTexture.GetPixels();
-
-        for (int y = 0; y < atlasSize; y++)
-        {
-            for (int x = 0; x < atlasSize; x++)
-            {
-                textureAtlas.SetPixels(x * 256, y * 256, 256, 256, defaultPixels);
-            }
-        }
-        textureAtlas.Apply();
         boidMaterial.SetTexture("_MainTex", textureAtlas);
 
         for (int i = 0; i < initialBoidCount; i++)
         {
             AddNewBoid();
         }
-        InitializeComputeBuffers();
         UpdateComputeBuffers();
         isInitialized = true;
     }
@@ -203,13 +151,6 @@ public class BoidsManager : MonoBehaviour
 
         GameObject newBoidObject = Instantiate(boidPrefab, transform.TransformPoint(newBoid.position), Quaternion.LookRotation(newBoid.velocity), transform);
         Material boidMat = new Material(boidMaterial);
-        Color backColor = backColors[Random.Range(0, backColors.Length)];
-        Color bellyColor = bellyColors[Random.Range(0, bellyColors.Length)];
-        boidMat.SetColor("_BackColor", backColor);
-        boidMat.SetColor("_BellyColor", bellyColor);
-        boidMat.SetFloat("_ColorStrength", colorStrength);
-        boidMat.SetFloat("_PatternStrength", patternStrength);
-        boidMat.SetFloat("_AtlasSize", atlasSize);
 
         int index = boidList.Count - 1;
         float uvX = (index % atlasSize) / (float)atlasSize;
@@ -231,111 +172,98 @@ public class BoidsManager : MonoBehaviour
         boidObjects.Add(newBoidObject);
     }
 
-    // CustomBoidManager.cs
-
-    public void AddCustomBoidToFlock(CustomBoidObject customBoidObject)
+    public void AddCustomBoidToFlock(CustomBoidParameters parameters, Vector3 position, Vector3 direction)
     {
-        Debug.Log("AddCustomBoidToFlock called with CustomBoidObject");
-        if (boidsManager == null)
+        if (boidList.Count >= maxBoids)
         {
-            Debug.LogError("BoidsManager is not assigned!");
-            return;
+            ResizeComputeBuffers();
         }
-        if (boidsManager != null)
+
+        Material boidMaterial = new Material(boidPrefab.GetComponent<Renderer>().sharedMaterial);
+        SetMaterialProperties(boidMaterial, parameters);
+
+        Boid newBoid = CreateNewBoid(position, direction, parameters);
+        boidList.Add(newBoid);
+
+        GameObject newBoidObject = CreateBoidObject(newBoid, position, direction, Vector3.one * parameters.scale, boidMaterial);
+        boidObjects.Add(newBoidObject);
+
+        UpdateComputeBuffers();
+        
+        Debug.Log($"Added new boid. Total boids: {boidList.Count}. FlockType: {newBoid.flockTypeIndex}");
+    }
+
+    private void SetMaterialProperties(Material material, CustomBoidParameters parameters)
+    {
+        material.SetColor("_BackColor", parameters.backColor);
+        material.SetColor("_BellyColor", parameters.bellyColor);
+        material.SetColor("_PatternBlackColor", parameters.patternBlackColor);
+        material.SetColor("_PatternWhiteColor", parameters.patternWhiteColor);
+        material.SetFloat("_ColorStrength", parameters.colorStrength);
+        material.SetFloat("_PatternStrength", parameters.patternStrength);
+        material.SetFloat("_Glossiness", parameters.glossiness);
+        material.SetFloat("_Metallic", parameters.metallic);
+        material.SetFloat("_NormalRotation", parameters.normalRotation);
+        material.SetFloat("_AORotation", parameters.aoRotation);
+        material.SetFloat("_RoughnessRotation", parameters.roughnessRotation);
+        material.SetFloat("_NormalStrength", parameters.normalStrength);
+        material.SetFloat("_AOStrength", parameters.aoStrength);
+        material.SetFloat("_RoughnessStrength", parameters.roughnessStrength);
+
+        if (parameters.customTexture != null)
         {
-            // カメラの位置と前方方向を取得
-            Vector3 cameraPosition = mainCamera.transform.position;
-            Vector3 cameraForward = mainCamera.transform.forward;
-
-            // カメラの奥にランダムな位置を生成
-            Vector3 randomOffset = Random.insideUnitSphere * spawnRadius;
-            randomOffset.z = Mathf.Max(randomOffset.z, minSpawnDistance); // z軸の最小値を設定
-            Vector3 spawnPosition = cameraPosition + cameraForward * spawnDistance + randomOffset;
-
-            // カメラの方向を基準にしたランダムな回転を生成
-            Quaternion randomRotation = Quaternion.LookRotation(Random.insideUnitSphere) * mainCamera.transform.rotation;
-
-            // 速度をカメラの前方方向を基準に設定
-            Vector3 initialVelocity = (randomRotation * Vector3.forward).normalized * Random.Range(boidsManager.minSpeed, boidsManager.maxSpeed);
-
-            // CustomBoidParametersを取得
-            CustomBoidParameters parameters = customBoidObject.parameters;
-
-            // BoidsManagerのAddCustomBoidToFlockメソッドを呼び出す
-            boidsManager.AddCustomBoidToFlock(customBoidObject.GetComponent<Renderer>().material, spawnPosition, initialVelocity, Vector3.one * parameters.scale);
+            material.SetTexture("_MainTex", parameters.customTexture);
         }
-        else
+    }
+
+    private Boid CreateNewBoid(Vector3 position, Vector3 direction, CustomBoidParameters parameters)
+    {
+        int flockTypeIndex = Random.Range(0, flockTypes.Length); // ランダムなFlockTypeを選択
+
+        return new Boid
         {
-            Debug.LogError("BoidsManager is not assigned to CustomBoidManager!");
+            position = transform.InverseTransformPoint(position),
+            velocity = direction.normalized * Random.Range(flockTypes[flockTypeIndex].minSpeed, flockTypes[flockTypeIndex].maxSpeed),
+            direction = direction.normalized,
+            uvOffset = new Vector2(Random.value, Random.value),
+            tailSwingPhase = Random.value * Mathf.PI * 2.0f,
+            tailFrequencyMultiplier = Random.value,
+            tailPhaseOffset = Random.value,
+            flockTypeIndex = flockTypeIndex
+        };
+    }
+
+    private GameObject CreateBoidObject(Boid boid, Vector3 position, Vector3 direction, Vector3 scale, Material material)
+    {
+        GameObject newBoidObject = Instantiate(boidPrefab, position, Quaternion.LookRotation(direction), transform);
+        newBoidObject.transform.localScale = scale;
+
+        Renderer boidRenderer = newBoidObject.GetComponent<Renderer>();
+        boidRenderer.material = material;
+
+        BoidMeshColorizer colorizer = newBoidObject.GetComponent<BoidMeshColorizer>();
+        if (colorizer != null)
+        {
+            colorizer.SetIndividualParameters(boid.tailFrequencyMultiplier, boid.tailPhaseOffset);
         }
+
+        return newBoidObject;
     }
 
     void OnTexturesDownloaded(List<Texture2D> textures)
     {
-        downloadedTextures = textures;
-        CreateTextureAtlas();
+        CreateTextureAtlas(textures);
         UpdateBoidTextures();
     }
 
-    public void CreateTextureAtlas()
+    public void CreateTextureAtlas(List<Texture2D> textures)
     {
-        int textureCount = downloadedTextures.Count;
-        int atlasSize = Mathf.CeilToInt(Mathf.Sqrt(textureCount));
-
-        textureAtlas = new Texture2D(atlasSize * 128, atlasSize * 128);
-
-        for (int i = 0; i < textureCount; i++)
-        {
-            Texture2D resizedTexture = ResizeTexture(downloadedTextures[i], 128, 128);
-
-            if (resizedTexture.width != 128 || resizedTexture.height != 128)
-            {
-                continue;
-            }
-
-            int atlasX = Mathf.Clamp(i % atlasSize, 0, atlasSize - 1) * 128;
-            int atlasY = Mathf.Clamp(i / atlasSize, 0, atlasSize - 1) * 128;
-
-            if (atlasX + 128 <= atlasSize * 128 && atlasY + 128 <= atlasSize * 128)
-            {
-                textureAtlas.SetPixels32(atlasX, atlasY, 128, 128, resizedTexture.GetPixels32());
-            }
-            else
-            {
-                Debug.LogError("Texture doesn't fit in atlas at: " + i);
-            }
-
-            Destroy(resizedTexture);
-        }
-
-        textureAtlas.Apply();
-        boidMaterial.SetTexture("_MainTex", textureAtlas);
-        
-        for (int i = 0; i < boidObjects.Count; i++)
-        {
-            boidObjects[i].GetComponent<Renderer>().material.SetTexture("_MainTex", textureAtlas);
-        }
+        // ... (CreateTextureAtlas implementation)
     }
 
     void UpdateBoidTextures()
     {
-        for (int i = 0; i < boidList.Count; i++)
-        {
-            Boid boid = boidList[i];
-            boid.uvOffset = new Vector2((i % atlasSize) / (float)atlasSize, (i / atlasSize) / (float)atlasSize);
-            boidList[i] = boid;
-
-            boidObjects[i].GetComponent<Renderer>().material.SetVector("_UvOffset", boid.uvOffset);
-        }
-        UpdateComputeBuffers();
-    }
-
-    private Texture2D ResizeTexture(Texture2D sourceTexture, int targetWidth, int targetHeight)
-    {
-        Texture2D resizedTexture = new Texture2D(targetWidth, targetHeight, TextureFormat.RGBA32, false);
-        resizedTexture.SetPixels(sourceTexture.GetPixels());
-        resizedTexture.Apply();
-        return resizedTexture;
+        // ... (UpdateBoidTextures implementation)
     }
 
     void UpdateComputeBuffers()
@@ -351,18 +279,15 @@ public class BoidsManager : MonoBehaviour
         computeShader.SetBuffer(kernelIndex, "positions", positionBuffer);
         computeShader.SetBuffer(kernelIndex, "directions", directionBuffer);
         computeShader.SetBuffer(kernelIndex, "flockTypes", flockTypeBuffer);
+
+        Debug.Log($"UpdateComputeBuffers: Boid count = {boidList.Count}, Positions count = {positions.Length}, Directions count = {directions.Length}");
     }
 
     void Update()
     {
         if (!isInitialized) return;
 
-        targetUpdateTimer += Time.deltaTime;
-        if (targetUpdateTimer >= targetUpdateInterval)
-        {
-            UpdateFlockTargets();
-            targetUpdateTimer = 0f;
-        }
+        UpdateFlockTargets();
 
         computeShader.SetFloat("deltaTime", Time.deltaTime);
         computeShader.SetVector("minBounds", minBounds);
@@ -372,10 +297,14 @@ public class BoidsManager : MonoBehaviour
         computeShader.SetFloat("flowFieldScale", flowFieldScale);
         computeShader.SetFloat("targetSeekStrength", targetSeekStrength);
         computeShader.SetFloat("time", Time.time);
+        computeShader.SetVector("cameraPosition", mainCamera.transform.position);
+        computeShader.SetFloat("cameraPullStrength", cameraPullStrength);
+        computeShader.SetFloat("maxDistanceFromCamera", maxDistanceFromCamera);
 
         UpdateComputeBuffers();
 
         computeShader.Dispatch(kernelIndex, Mathf.CeilToInt(boidList.Count / 64f), 1, 1);
+
 
         Vector3[] positions = new Vector3[boidList.Count];
         Vector3[] directions = new Vector3[boidList.Count];
@@ -387,21 +316,24 @@ public class BoidsManager : MonoBehaviour
 
         for (int i = 0; i < boidList.Count; i++)
         {
-            Boid updatedBoid = updatedBoids[i];
-            updatedBoid.position = positions[i];
-            updatedBoid.direction = directions[i];
-            boidList[i] = updatedBoid;
+            UpdateBoidObject(i, updatedBoids[i], positions[i], directions[i]);
+        }
+    }
 
-            boidObjects[i].transform.position = transform.TransformPoint(positions[i]);
-            boidObjects[i].transform.rotation = Quaternion.LookRotation(directions[i]);
-            
-            Renderer renderer = boidObjects[i].GetComponent<Renderer>();
-            if (renderer != null)
-            {
-                renderer.material.SetFloat("_TailSwingPhase", updatedBoid.tailSwingPhase);
-                renderer.material.SetFloat("_TailFrequencyMultiplier", updatedBoid.tailFrequencyMultiplier);
-                renderer.material.SetFloat("_TailPhaseOffset", updatedBoid.tailPhaseOffset);
-            }
+    private void UpdateBoidObject(int index, Boid updatedBoid, Vector3 position, Vector3 direction)
+    {
+        boidList[index] = updatedBoid;
+
+        GameObject boidObject = boidObjects[index];
+        boidObject.transform.position = transform.TransformPoint(position);
+        boidObject.transform.rotation = Quaternion.LookRotation(direction);
+        
+        Renderer renderer = boidObject.GetComponent<Renderer>();
+        if (renderer != null)
+        {
+            renderer.material.SetFloat("_TailSwingPhase", updatedBoid.tailSwingPhase);
+            renderer.material.SetFloat("_TailFrequencyMultiplier", updatedBoid.tailFrequencyMultiplier);
+            renderer.material.SetFloat("_TailPhaseOffset", updatedBoid.tailPhaseOffset);
         }
     }
 
@@ -417,73 +349,36 @@ public class BoidsManager : MonoBehaviour
 
     void UpdateFlockTargets()
     {
-        for (int i = 0; i < flockTypes.Length; i++)
+        targetUpdateTimer += Time.deltaTime;
+        if (targetUpdateTimer >= targetUpdateInterval)
         {
-            FlockType flock = flockTypes[i];
-            if (Random.value < 0.3f)
+            for (int i = 0; i < flockTypes.Length; i++)
             {
-                flock.targetPosition = GetRandomTargetPosition();
+                if (Random.value < 0.3f)
+                {
+                    FlockType flock = flockTypes[i];
+                    flock.targetPosition = GetRandomTargetPosition();
+                    flockTypes[i] = flock;
+                }
             }
-            flockTypes[i] = flock;
+            targetUpdateTimer = 0f;
         }
     }
 
-    public void UpdateControlledBoidParameters(Vector3 position, Vector3 velocity, float scale, Material material)
+    Vector3 GetRandomTargetPosition()
     {
-        if (!isControlledBoidInFlock && controlledBoidObject != null)
-        {
-            controlledBoidObject.transform.position = position;
-            controlledBoidObject.transform.rotation = Quaternion.LookRotation(velocity);
-            controlledBoidObject.transform.localScale = Vector3.one * scale;
-            controlledBoidObject.GetComponent<Renderer>().material = material;
-        }
+        return Random.insideUnitSphere * targetRadius;
     }
 
-    public void ToggleControlledBoid(Vector3 position, Vector3 velocity, float scale, Material material)
+    void ResizeComputeBuffers()
     {
-        if (isControlledBoidInFlock)
-        {
-            int index = boidList.FindIndex(b => b.Equals(controlledBoid));
-            if (index != -1)
-            {
-                boidList.RemoveAt(index);
-                Destroy(boidObjects[index]);
-                boidObjects.RemoveAt(index);
-            }
-            
-            controlledBoidObject.transform.position = controlledBoidInitialPosition;
-            controlledBoidObject.SetActive(true);
-            
-            isControlledBoidInFlock = false;
-        }
-        else
-        {
-            controlledBoid = new Boid
-            {
-                position = transform.InverseTransformPoint(position),
-                velocity = velocity,
-                direction = velocity.normalized,
-                tailSwingPhase = Random.value * Mathf.PI * 2.0f,
-                uvOffset = new Vector2(Random.value, Random.value),
-                flockTypeIndex = Random.Range(0, flockTypes.Length),
-                tailFrequencyMultiplier = Random.value,
-                tailPhaseOffset = Random.value
-            };
-            
-            boidList.Add(controlledBoid);
-            
-            GameObject newBoidObject = Instantiate(boidPrefab, position, Quaternion.LookRotation(velocity), transform);
-            newBoidObject.transform.localScale = Vector3.one * scale;
-            newBoidObject.GetComponent<Renderer>().material = material;
-            boidObjects.Add(newBoidObject);
-            
-            controlledBoidInitialPosition = controlledBoidObject.transform.position;
-            controlledBoidObject.SetActive(false);
-            
-            isControlledBoidInFlock = true;
-        }
+        maxBoids *= 2;
 
-        UpdateComputeBuffers();
+        if (boidBuffer != null) boidBuffer.Release();
+        if (positionBuffer != null) positionBuffer.Release();
+        if (directionBuffer != null) directionBuffer.Release();
+
+        InitializeComputeBuffers();
     }
 
     void OnDestroy()
@@ -494,44 +389,11 @@ public class BoidsManager : MonoBehaviour
         if (directionBuffer != null) directionBuffer.Release();
     }
 
-    Vector3 GetRandomTargetPosition()
+    private Texture2D ResizeTexture(Texture2D sourceTexture, int targetWidth, int targetHeight)
     {
-        return Random.insideUnitSphere * targetRadius;
+        Texture2D resizedTexture = new Texture2D(targetWidth, targetHeight, TextureFormat.RGBA32, false);
+        resizedTexture.SetPixels(sourceTexture.GetPixels());
+        resizedTexture.Apply();
+        return resizedTexture;
     }
-
-    private void UpdateBoidInComputeShader(int index, Boid boid)
-    {
-        computeShader.SetInt("updateIndex", index);
-        computeShader.SetVector("updatePosition", boid.position);
-        computeShader.SetVector("updateVelocity", boid.velocity);
-        computeShader.SetVector("updateUvOffset", boid.uvOffset);
-        computeShader.SetVector("updateDirection", boid.direction);
-        computeShader.SetFloat("updateTailSwingPhase", boid.tailSwingPhase);
-        computeShader.SetFloat("updateTailFrequencyMultiplier", boid.tailFrequencyMultiplier);
-        computeShader.SetFloat("updateTailPhaseOffset", boid.tailPhaseOffset);
-        computeShader.SetInt("updateFlockTypeIndex", boid.flockTypeIndex);
-
-        computeShader.Dispatch(updateSingleBoidKernel, 1, 1, 1);
-    }
-}
-
-[System.Serializable]
-public struct CustomBoidParameters
-{
-    public Color backColor;
-    public Color bellyColor;
-    public Color patternBlackColor;
-    public Color patternWhiteColor;
-    public float colorStrength;
-    public float patternStrength;
-    public float glossiness;
-    public float metallic;
-    public float normalRotation;
-    public float aoRotation;
-    public float roughnessRotation;
-    public float normalStrength;
-    public float aoStrength;
-    public float roughnessStrength;
-    public Texture2D customTexture;
-    public float scale;
 }

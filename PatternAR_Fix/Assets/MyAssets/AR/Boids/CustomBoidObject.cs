@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 public class CustomBoidObject : MonoBehaviour
 {
+    public GameObject CustomBOidObjectOriginak;
     [Header("Parameters")]
     public CustomBoidParameters parameters;
 
@@ -16,6 +17,16 @@ public class CustomBoidObject : MonoBehaviour
     public Renderer previewRenderer;
 
     public ImageGallery imageGallery;
+
+
+    private void Awake()
+    {
+        //if (parameters == null)
+        //{
+        parameters = new CustomBoidParameters();
+            // デフォルト値を設定
+        //}
+    }
 
     private void Start()
     {
@@ -34,7 +45,43 @@ public class CustomBoidObject : MonoBehaviour
 
     public void AddToFlock()
     {
-        CustomBoidManager.Instance.AddCustomBoidToFlock(this);
+        if (CustomBoidManager.Instance != null)
+        {
+            CustomBoidManager.Instance.AddCustomBoidToFlock(this);
+        }
+        else
+        {
+            Debug.LogError("CustomBoidManager.Instance is null");
+        }
+    }
+
+    public CustomBoidParameters GetCurrentParameters()
+    {
+        if (previewRenderer == null)
+        {
+            Debug.LogError("Preview Renderer is not assigned");
+            return parameters;
+        }
+
+        Material mat = previewRenderer.sharedMaterial;
+        parameters.backColor = mat.GetColor("_BackColor");
+        parameters.bellyColor = mat.GetColor("_BellyColor");
+        parameters.patternBlackColor = mat.GetColor("_PatternBlackColor");
+        parameters.patternWhiteColor = mat.GetColor("_PatternWhiteColor");
+        parameters.colorStrength = mat.GetFloat("_ColorStrength");
+        parameters.patternStrength = mat.GetFloat("_PatternStrength");
+        parameters.glossiness = mat.GetFloat("_Glossiness");
+        parameters.metallic = mat.GetFloat("_Metallic");
+        parameters.normalRotation = mat.GetFloat("_NormalRotation");
+        parameters.aoRotation = mat.GetFloat("_AORotation");
+        parameters.roughnessRotation = mat.GetFloat("_RoughnessRotation");
+        parameters.normalStrength = mat.GetFloat("_NormalStrength");
+        parameters.aoStrength = mat.GetFloat("_AOStrength");
+        parameters.roughnessStrength = mat.GetFloat("_RoughnessStrength");
+        parameters.customTexture = mat.GetTexture("_MainTex") as Texture2D;
+        parameters.scale = transform.localScale.x;
+
+        return parameters;
     }
 
     public void SetCustomTexture(Texture2D texture)

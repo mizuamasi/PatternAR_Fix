@@ -5,7 +5,7 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/BlocksEngine2/Scenes/BE2SampleScene.unity
     guid: 2cda990e2423bbf4892e6590ba056729
   - enabled: 0
@@ -17,10 +17,18 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/BlocksEngine2_SciFi/Scenes/ScifiBE2SampleScene.unity
     guid: 28db5afba24f900ba844c731679c8717
+  - enabled: 1
+    path: Assets/Scenes/UI_Fixed.unity
+    guid: 5597d539999224b4f8cd4ef8d2ad5753
+  - enabled: 1
+    path: Assets/Scenes/AR.unity
+    guid: 9fc0d4010bbf28b4594072e72b8655ab
   m_configObjects:
     UnityEditor.XR.ARCore.ARCoreSettings: {fileID: 11400000, guid: fe11346c82df84231aa85fbccea9c5fb,
       type: 2}
     UnityEditor.XR.ARKit.ARKitSettings: {fileID: 11400000, guid: 435d8ad6b900f44d0b4508b1abe9ff03,
       type: 2}
     com.unity.xr.arfoundation.simulation_settings: {fileID: 11400000, guid: 2f0548e0a75c14d39b51f29c2489ace2,
+      type: 2}
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: ef38bfd81ae3745539045b1a61ec17d5,
       type: 2}

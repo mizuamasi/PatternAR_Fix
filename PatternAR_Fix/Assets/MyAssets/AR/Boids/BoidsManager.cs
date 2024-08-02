@@ -280,7 +280,9 @@ public class BoidsManager : MonoBehaviour
         computeShader.SetBuffer(kernelIndex, "directions", directionBuffer);
         computeShader.SetBuffer(kernelIndex, "flockTypes", flockTypeBuffer);
 
-        Debug.Log($"UpdateComputeBuffers: Boid count = {boidList.Count}, Positions count = {positions.Length}, Directions count = {directions.Length}");
+       //Debug.Log($"UpdateComputeBuffers: Boid count = {boidList.Count}, Positions count = {positions.Length}, Directions count = {directions.Length}");
+        //Debug.Log(positions[0] +":pos " + directions[0] + ":direction");
+
     }
 
     void Update()

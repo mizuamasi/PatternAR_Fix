@@ -61,8 +61,8 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _ArcLength: 289
-    - _ArcThickness: 0.5
+    - _ArcLength: 1
+    - _ArcThickness: 0.06
     - _BumpScale: 1
     - _ColorMask: 15
     - _Cutoff: 0.5

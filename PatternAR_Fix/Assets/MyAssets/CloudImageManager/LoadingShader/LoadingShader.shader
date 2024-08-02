@@ -113,10 +113,9 @@ Shader "Custom/UI/RotatingArcLoadingIcon"
                 float arcAngle = atan2(rotatedPos.y, rotatedPos.x) + UNITY_PI;
                 
                 float4 color = IN.color;
-                color.a *= step(1 - _ArcThickness, dist) * step(dist, 1) * 
-                           step(arcStart, arcAngle) * step(arcAngle, arcEnd);
+                color.a *= step(0.5- _ArcThickness, dist) * step(dist, 0.5) * step(_ArcLength , arcAngle);
                 
-
+                //color.a = (1. - color.a );
                 #ifdef UNITY_UI_CLIP_RECT
                 color.a *= UnityGet2DClipping(IN.worldPosition.xy, _ClipRect);
                 #endif

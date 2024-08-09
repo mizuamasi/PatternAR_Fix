@@ -285,10 +285,35 @@ public class BoidsManager : MonoBehaviour
 
     }
 
+    void AssignMainCamera()
+    {
+        if (mainCamera == null)
+        {
+            mainCamera = Camera.main;
+            if (mainCamera == null)
+            {
+                Debug.LogWarning("Main camera not found. Searching for any camera in the scene.");
+                mainCamera = FindObjectOfType<Camera>();
+                if (mainCamera == null)
+                {
+                    Debug.LogError("No camera found in the scene. Please add a camera or assign one manually.");
+                }
+                else
+                {
+                    Debug.Log("Camera found and assigned: " + mainCamera.name);
+                }
+            }
+            else
+            {
+                Debug.Log("Main camera found and assigned: " + mainCamera.name);
+            }
+        }
+    }
+
     void Update()
     {
         if (!isInitialized) return;
-
+        AssignMainCamera();
         UpdateFlockTargets();
 
         computeShader.SetFloat("deltaTime", Time.deltaTime);

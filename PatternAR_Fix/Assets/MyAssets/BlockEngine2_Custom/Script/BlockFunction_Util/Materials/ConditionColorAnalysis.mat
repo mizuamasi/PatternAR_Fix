@@ -28,7 +28,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ConditionTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 8400000, guid: 15c5cbdc652e76548bd4a63ecfe5dd1a, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
@@ -48,7 +48,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 8400000, guid: 2d0376eb8fe2b4c1985136a0496d171f, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -75,13 +75,13 @@ Material:
     - _IsGreaterOrEqual: 1
     - _Metallic: 0
     - _Mode: 0
-    - _NeighborhoodSize: 3
+    - _NeighborhoodSize: 2
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _Threshold: 4
+    - _Threshold: 25
     - _UVSec: 0
     - _ZWrite: 1
     - _isSameColor: 1

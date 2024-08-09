@@ -97,6 +97,7 @@ Shader "Custom/BoidsShader"
             // アトラスから特定の部分をサンプリング
             float2 uv = frac(IN.uv_MainTex * (1.0 / max(_AtlasSize, 1.0)) + _UvOffset / max(_AtlasSize, 1.0));
             uv = frac(uv * max(_TileAmount, 0.001));
+            uv = IN.uv_MainTex.xy;
             half4 c = tex2D(_MainTex, uv);
 
             // パターンの強度を計算（コントラストを上げる）

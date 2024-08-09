@@ -644,7 +644,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 440.02502, y: 0}
+  m_AnchoredPosition: {x: 440.03503, y: 0}
   m_SizeDelta: {x: 0, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &127343750331959895
@@ -1153,7 +1153,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 755.04004, y: 180}
+  m_SizeDelta: {x: 755.05005, y: 180}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &5505278768539634943
 MonoBehaviour:
@@ -1230,7 +1230,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 652.53503, y: 0}
+  m_AnchoredPosition: {x: 652.54504, y: 0}
   m_SizeDelta: {x: 0, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5941560560937502107
@@ -3386,7 +3386,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 219, y: -219}
-  m_SizeDelta: {x: 755.04004, y: 180}
+  m_SizeDelta: {x: 755.05005, y: 180}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &2667640470763124069
 MonoBehaviour:
@@ -3509,7 +3509,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 70, y: 40}
+  m_SizeDelta: {x: 70.01, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &510802326361398531
 CanvasRenderer:
@@ -3815,7 +3815,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 755.04004, y: 100}
+  m_SizeDelta: {x: 755.05005, y: 100}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &8718500251729566567
 CanvasRenderer:
@@ -4136,7 +4136,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 755.04004, y: 80}
+  m_SizeDelta: {x: 755.05005, y: 80}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5147037058861123729
 CanvasRenderer:

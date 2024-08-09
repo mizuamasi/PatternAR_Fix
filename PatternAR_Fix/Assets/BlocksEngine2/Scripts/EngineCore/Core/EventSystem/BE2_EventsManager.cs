@@ -22,7 +22,8 @@ namespace MG_BlocksEngine2.Core
         // v2.10 - new events added to enable the use of an auxiliary key to change the programmingEnv zoom using key+scroll: OnSecondaryKeyUp, OnAuxKeyDown, OnAuxKeyUp
         OnSecondaryKeyUp, OnAuxKeyDown, OnAuxKeyUp,
         // v2.12 - new general OnBlockDrop event added
-        OnBlockDrop
+        OnBlockDrop,
+        OnPrimaryKeyClick
     }
 
     public enum BE2EventTypesBlock

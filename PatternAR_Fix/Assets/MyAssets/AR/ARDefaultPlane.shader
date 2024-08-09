@@ -6,7 +6,7 @@ Shader "Unlit/ARDefaultPlane"
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
+        Tags { "Queue"="geometry-1" }
         LOD 100
         ColorMask 0
         Pass

@@ -1,0 +1,87 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5980041810681128449
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 916487508069517821}
+  - component: {fileID: 6833968892886533813}
+  m_Layer: 0
+  m_Name: BE2 Inspector
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &916487508069517821
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5980041810681128449}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6833968892886533813
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5980041810681128449}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f307d7ef18b5cb99d938e5a20bf89309, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  BlockTemplate: {fileID: 593529907575777918, guid: e44a733b760c1c4ea9b54718989d67c7,
+    type: 3}
+  SimpleTemplate: {fileID: 3892023949215922138, guid: 6d5b69b661180ac05909266398287494,
+    type: 3}
+  TriggerTemplate: {fileID: 7841089937709775616, guid: c4f8ddb7bd7917c1bb166bb702d6f421,
+    type: 3}
+  OperationTemplate: {fileID: 6076205529163424463, guid: b6899823c31aa5c0491b709447c18227,
+    type: 3}
+  SectionTemplate: {fileID: 3352768366470490496, guid: 75ed93926ad55f44887a598a57f175d1,
+    type: 3}
+  HeaderTemplate: {fileID: 1023725384046911719, guid: 2b93d48ddcfed19df9548082e4b61989,
+    type: 3}
+  HeaderMiddleTemplate: {fileID: 3861306607350376134, guid: f062c5968bb336864b8e0ab95e409776,
+    type: 3}
+  BodyEndTemplate: {fileID: 5013504415977848811, guid: 1c989be6fbd1e04dbaa8b2d27c349390,
+    type: 3}
+  BodyMiddleTemplate: {fileID: 4471996929335944123, guid: 256e93d5cc6edcf8f8ead0617e04d655,
+    type: 3}
+  OuterAreaTemplate: {fileID: 1293376876260430527, guid: ebd55810d2bff6e0281b7e63bb0775cd,
+    type: 3}
+  DropdownTemplate: {fileID: 7103426772843345624, guid: 62ba8929c77e9b16b81394d769e476d9,
+    type: 3}
+  InputFieldTemplate: {fileID: 5719855370789997705, guid: 3decf91c8e518b77da7dba5feb00381c,
+    type: 3}
+  LabelTextTemplate: {fileID: 6054300827138557466, guid: 6d47798909d8e50ae94822bfb829aca6,
+    type: 3}
+  instructionName: TestBlock2
+  blockType: 0
+  blockColor: {r: 1, g: 0.5647059, b: 0.2784314, a: 1}
+  blockHeaderMarkup: test2 $text $dropdown gggs $text
+  inputValues:
+  - 2
+  - a, d, ffdf
+  - text here
+  newInstructionPath: '[dataPath]/BlocksEngine2/Scripts/EngineCore/Instruction/BlockInstructions/Custom/'
+  newBlockPrefabPath: Assets/BlocksEngine2/Prefabs/Resources/Blocks/Custom/
+  usePersistentPathOnBuild: 1
+  savedCodesPath: '[dataPath]/BlocksEngine2/Saves/'
+  _camera: {fileID: 0}
+  _canvasRenderMode: 0
+  autoSetDragDropDetectionDistance: 1

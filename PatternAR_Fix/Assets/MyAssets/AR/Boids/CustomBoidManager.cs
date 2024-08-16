@@ -5,10 +5,11 @@ public class CustomBoidManager : MonoBehaviour
     public static CustomBoidManager Instance { get; private set; }
 
     public BoidsManager boidsManager;
-    public Camera mainCamera;
     public float spawnDistance = 5f;
     public float spawnRadius = 2f;
     public float minSpawnDistance = 0.5f;
+
+    private Camera mainCamera;
 
     private void Awake()
     {
@@ -22,20 +23,57 @@ public class CustomBoidManager : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        // Start時にメインカメラを取得
+        mainCamera = GetMainCamera().GetComponent<Camera>();
+        if (mainCamera == null)
+        {
+            Debug.LogError("Main camera not found or doesn't have a Camera component!");
+        }
+    }
+
+    public static GameObject GetMainCamera()
+    {
+        GameObject cameraObject = GameObject.FindWithTag("MainCamera");
+
+        if (cameraObject != null)
+        {
+            return cameraObject;
+        }
+
+        Camera cameraComponent = Camera.main;
+        if (cameraComponent != null)
+        {
+            return cameraComponent.gameObject;
+        }
+
+        Debug.LogWarning("MainCamera not found in the scene.");
+        return null;
+    }
+
     public void AddCustomBoidToFlock(CustomBoidObject customBoidObject)
     {
+        
+        // Start時にメインカメラを取得
+        mainCamera = GetMainCamera().GetComponent<Camera>();
         if (boidsManager == null)
         {
             Debug.LogError("BoidsManager is not assigned!");
             return;
         }
 
-         CustomBoidParameters parameters = customBoidObject.GetCurrentParameters();
-        // パラメータのscaleが正しく設定されていることを確認
+        if (mainCamera == null)
+        {
+            Debug.LogError("Main camera is not assigned!");
+            return;
+        }
+
+        CustomBoidParameters parameters = customBoidObject.GetCurrentParameters();
         if (parameters.scale == 0f)
         {
-            parameters.scale = 0.1f;  // デフォルト値を設定
-            Debug.LogWarning("Boid scale was 0, set to default value 1");
+            parameters.scale = 0.1f;
+            Debug.LogWarning("Boid scale was 0, set to default value 0.1");
         }
 
         Vector3 spawnPosition = CalculateSpawnPosition();

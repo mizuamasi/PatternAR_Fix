@@ -18,6 +18,7 @@ public class ChangeSceneButton : MonoBehaviour
 
     void OnButtonClick()
     {
+        SceneTransitionManager.Instance.LoadScene(sceneName);
         // 指定されたシーンをロード
         SceneManager.LoadScene(sceneName);
     }

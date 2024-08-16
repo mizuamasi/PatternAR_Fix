@@ -42,6 +42,10 @@ float flowFieldScale;
 float targetSeekStrength;
 float time;
 
+// 新しいパラメータ
+float cameraAttractionStrength;
+float cameraAttractionRadius;
+
 float3 flowField(float3 position)
 {
     float3 flow = float3(
@@ -138,6 +142,19 @@ float3 cameraPull(float3 position)
     return normalize(toCamera) * pullFactor * cameraPullStrength;
 }
 
+// 新しい関数: カメラへの引き寄せ力を計算
+float3 cameraAttraction(float3 position)
+{
+    float3 toCamera = cameraPosition - position;
+    float distanceToCamera = length(toCamera);
+    if (distanceToCamera < cameraAttractionRadius)
+    {
+        float attractionFactor = 1.0 - (distanceToCamera / cameraAttractionRadius);
+        return normalize(toCamera) * cameraAttractionStrength * attractionFactor;
+    }
+    return float3(0, 0, 0);
+}
+
 [numthreads(64,1,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
@@ -153,8 +170,11 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     float3 flow = flowField(boid.position);
     float3 seek = seekTarget(boid.position, boid.velocity, flockType.targetPosition, flockType.maxSpeed) * targetSeekStrength;
     float3 pull = cameraPull(boid.position);
+    
+    // 新しい引き寄せ力を追加
+    float3 attract = cameraAttraction(boid.position);
 
-    float3 acceleration = sep + ali + coh + flow + seek + pull;
+    float3 acceleration = sep + ali + coh + flow + seek + pull + attract;
     boid.velocity += acceleration * deltaTime;
     
     float speed = length(boid.velocity);

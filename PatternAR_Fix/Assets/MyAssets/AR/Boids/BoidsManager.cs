@@ -127,6 +127,38 @@ public class BoidsManager : MonoBehaviour
         isInitialized = true;
     }
 
+    private bool isAttractingToCamera = false;
+    private float attractionTimer = 0f;
+
+    void UpdateCameraAttraction()
+    {
+        float cameraAttractionStrength = 2.0f;
+        float cameraAttractionRadius = 55.0f;
+        float cameraAttractionDuration = 3.0f;
+
+        // ComputeShaderに新しいパラメータを設定
+        computeShader.SetFloat("cameraAttractionStrength", isAttractingToCamera ? cameraAttractionStrength : 0f);
+        computeShader.SetFloat("cameraAttractionRadius", cameraAttractionRadius);
+
+        // カメラへの引き寄せタイマーを更新
+        if (isAttractingToCamera)
+        {
+            attractionTimer += Time.deltaTime;
+            if (attractionTimer >= cameraAttractionDuration)
+            {
+                isAttractingToCamera = false;
+                attractionTimer = 0f;
+            }
+        }
+    }
+
+    // ボタンが押されたときに呼び出される関数
+    public void OnAttractionButtonPressed()
+    {
+        isAttractingToCamera = true;
+        attractionTimer = 0f;
+    }
+
     void AddNewBoid()
     {
         Vector3 initialVelocity = Random.insideUnitSphere.normalized * 2f;
@@ -327,6 +359,9 @@ public class BoidsManager : MonoBehaviour
         computeShader.SetVector("cameraPosition", mainCamera.transform.position);
         computeShader.SetFloat("cameraPullStrength", cameraPullStrength);
         computeShader.SetFloat("maxDistanceFromCamera", maxDistanceFromCamera);
+
+        // カメラ引き寄せ機能の更新
+        UpdateCameraAttraction();
 
         UpdateComputeBuffers();
 

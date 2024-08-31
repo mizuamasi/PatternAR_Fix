@@ -7,12 +7,12 @@ Shader "Custom/BoidsShader"
         _AOMap ("AO Map", 2D) = "white" {}
         _HeightMap ("Height Map", 2D) = "white" {}
         _RoughnessMap ("Roughness Map", 2D) = "white" {}
-        _BackColor ("Back Color", Color) = (1,1,1,1)
-        _BellyColor ("Belly Color", Color) = (1,1,1,1)
-        _PatternBlackColor ("Black Color", Color) = (0,0,0,1)
-        _PatternWhiteColor ("White Color", Color) = (1,1,1,1)
+        _BackColor ("Pattern Color", Color) = (1,1,1,1)
+        _BellyColor ("Base Color", Color) = (1,1,1,1)
         _ColorStrength ("Color Strength", Range(0,1)) = 0.5
         _PatternStrength ("Pattern Strength", Range(0,1)) = 1.0
+        _BaseColorStrength ("Base Color Strength", Range(0,1)) = 0.5
+        _LightInfluence ("Light Influence", Range(0,1)) = 0.5
         _Glossiness ("Smoothness", Range(0,1)) = 0.5
         _Metallic ("Metallic", Range(0,1)) = 0.0
         _NormalRotation ("Normal Map Rotation", Range(0,360)) = 0.0
@@ -37,8 +37,10 @@ Shader "Custom/BoidsShader"
         LOD 200
 
         CGPROGRAM
-        #pragma surface surf Standard fullforwardshadows vertex:vert addshadow
+        #pragma surface surf StandardCustom fullforwardshadows vertex:vert addshadow
         #pragma target 3.0
+
+        #include "UnityPBSLighting.cginc"
 
         sampler2D _MainTex;
         sampler2D _NormalMap;
@@ -49,6 +51,8 @@ Shader "Custom/BoidsShader"
         fixed4 _BellyColor;
         float _ColorStrength;
         float _PatternStrength;
+        float _BaseColorStrength;
+        float _LightInfluence;
         half _Glossiness;
         half _Metallic;
         float _TailFrequencyMultiplier;
@@ -66,14 +70,23 @@ Shader "Custom/BoidsShader"
         float _NormalStrength;
         float _AOStrength;
         float _RoughnessStrength;
-        float3 _PatternBlackColor;
-        float3 _PatternWhiteColor;
 
         struct Input
         {
             float2 uv_MainTex : TEXCOORD0;
             float4 vertexColor : COLOR;
             float3 localPos : TEXCOORD1;
+        };
+
+        struct SurfaceOutputStandardCustom
+        {
+            fixed3 Albedo;
+            fixed3 Normal;
+            half3 Emission;
+            half Metallic;
+            half Smoothness;
+            half Occlusion;
+            fixed Alpha;
         };
 
         float2 RotateUV(float2 uv, float rotation)
@@ -92,19 +105,47 @@ Shader "Custom/BoidsShader"
             v.vertex.x += sin(tailPhase) * tailEffect * _TailAmplitude + bodyBend;
         }
 
-        void surf (Input IN, inout SurfaceOutputStandard o)
+        // カスタムライティング関数
+        half4 LightingStandardCustom(SurfaceOutputStandardCustom s, half3 viewDir, UnityGI gi)
+        {
+            // 標準のPBRライティングを計算
+            SurfaceOutputStandard r;
+            r.Albedo = s.Albedo;
+            r.Normal = s.Normal;
+            r.Emission = s.Emission;
+            r.Metallic = s.Metallic;
+            r.Smoothness = s.Smoothness;
+            r.Occlusion = s.Occlusion;
+            r.Alpha = s.Alpha;
+            
+            half4 pbr = LightingStandard(r, viewDir, gi);
+            
+            // ライトの影響を調整
+            pbr.rgb = lerp(s.Albedo, pbr.rgb, _LightInfluence);
+            
+            return pbr;
+        }
+
+        void LightingStandardCustom_GI(SurfaceOutputStandardCustom s, UnityGIInput data, inout UnityGI gi)
+        {
+            UNITY_GI(gi, s, data);
+        }
+
+        void surf (Input IN, inout SurfaceOutputStandardCustom o)
         {
             // アトラスから特定の部分をサンプリング
             float2 uv = frac(IN.uv_MainTex * (1.0 / max(_AtlasSize, 1.0)) + _UvOffset / max(_AtlasSize, 1.0));
             uv = frac(uv * max(_TileAmount, 0.001));
             uv = IN.uv_MainTex.xy;
             half4 c = tex2D(_MainTex, uv);
-
+            uv /= 20.;
+            
             // パターンの強度を計算（コントラストを上げる）
             float patternIntensity = saturate((length(c.rgb) - 0.5) * 2.0 + 0.5);
-            float3 patternColor = lerp(1.0 - _PatternWhiteColor, _PatternWhiteColor, patternIntensity);
-
-            // 背中と腹、側面の色を決定
+            
+            float3 baseColor = _BellyColor.rgb;
+            float3 patternColor = _BackColor.rgb;
+            
             float3 objNormal = normalize(IN.vertexColor.gba * 2.0 - 1.0);
             float backFactor = max(objNormal.y, 0.001);
             float bellyFactor = max(-objNormal.y, 0.001);
@@ -112,16 +153,20 @@ Shader "Custom/BoidsShader"
             
             // パターンの強さを計算
             float patternFactor = max(_PatternStrength, 0.001);
-            patternFactor *= lerp(0.8, 1.2, pow(backFactor, 0.3) + sideFactor * 0.5); // 背中と側面でパターンを強調
+            patternFactor *= lerp(0.8, 1.2, pow(backFactor, 0.3) + sideFactor * 0.5);
             float zFactor = max(0.001, abs(IN.localPos.z + 4.0));
-            patternFactor *= saturate((1.0 - zFactor * 0.15) * 2.0); // zFactorの影響をさらに弱める
-            patternFactor *= (0.9 + 0.1 * sin(IN.localPos.x * 8.0 + IN.localPos.y * 12.0)); // 微妙な変動を追加
-            // アトラス要素絵をぬく
+            patternFactor *= saturate((1.0 - zFactor * 0.15) * 2.0);
+            patternFactor *= (0.9 + 0.1 * sin(IN.localPos.x * 8.0 + IN.localPos.y * 12.0));
+            
             // 色とパターンを合成
-            fixed4 baseColor = lerp(_BellyColor, _BackColor, backFactor + sideFactor * 0.5);
-            float patternStrength = saturate(patternFactor * pow(patternIntensity, 1.5)); // パターンの強度を強調
-            fixed3 finalColor = lerp(baseColor.rgb, patternColor, patternStrength);
+            float patternStrength = saturate(patternFactor * pow(patternIntensity, 1.5));
+            fixed3 finalColor = lerp(baseColor, patternColor, patternStrength * _PatternStrength);
+            
+            // ベースカラーの強調
+            finalColor = lerp(finalColor, baseColor, _BaseColorStrength);
+            
             uv *= 33.;
+            
             // Normal map の適用
             float2 normalUV = RotateUV(uv, _NormalRotation);
             fixed3 normalTex = UnpackNormal(tex2D(_NormalMap, normalUV)).rgb;
@@ -130,16 +175,15 @@ Shader "Custom/BoidsShader"
             // AO map の適用
             float2 aoUV = RotateUV(uv, _AORotation);
             float ao = tex2D(_AOMap, aoUV).r;
-            ao = lerp(1.0, ao, _AOStrength);
 
             // Roughness map の適用
             float2 roughnessUV = RotateUV(uv, _RoughnessRotation);
             float roughness = tex2D(_RoughnessMap, roughnessUV).r;
             roughness = lerp(_Glossiness, roughness, _RoughnessStrength);
 
-            // ColorStrengthの影響を調整
-            o.Albedo = lerp(baseColor.rgb, finalColor, _ColorStrength * 1.5);
-            o.Albedo.rgb += c.rgb * ao;
+            // Albedoの設定
+            o.Albedo = finalColor;
+            o.Albedo.rgb += c.rgb * ao; // AOの影響を弱める
             o.Normal = normalTex;
             o.Metallic = _Metallic;
             o.Smoothness = roughness;

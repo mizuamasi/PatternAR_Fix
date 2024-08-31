@@ -80,6 +80,7 @@ Material:
     - _AORotation: 270
     - _AOStrength: 1
     - _AtlasSize: 1
+    - _BaseColorStrength: 0.5
     - _BodyBendAmount: 0.05
     - _BumpScale: 1
     - _ColorStrength: 0
@@ -89,6 +90,7 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0.025
     - _GlossyReflections: 1
+    - _LightInfluence: 0.5
     - _Metallic: 0
     - _Mode: 0
     - _NormalRotation: 270
